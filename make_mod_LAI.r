@@ -93,7 +93,7 @@ makeJob <- function(job) {
     runi('control')
 
     files0 = files
-    files[2] = '../vegfrac_igbp.nc'
+    files[2] = 'data/vegfrac_igbp.nc'
     runi('obsVegDist')
 
     levels = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET")
