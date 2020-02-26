@@ -13,17 +13,24 @@ levels = list(trees = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET"),
               grass = c("C3G", "C4G", "C3C", "C4C", "C3P", "C4P"))
         
 igbp_file = 'data/vegfrac_igbp.nc'
-obs_files = list(tress = list(igbp = c(igbp_file, c(1, 2))),
-                 wood  = list(igbp = c(igbp_file, c(1, 2, 5))),
-                 shrub = list(igbp = c(igbp_file, c(5))),
-                 grass = list(igbp = c(igbp_file, c(3,4))))
-              
-#layers = c(1    , 1       , 1       , 2    , 2    , 5    , 5    , 3    , 4    , 3    , 4    , 3    , 4    )
+cci__file = 'data/vegfrac_refLC_refCW.nc'
+
+obs_files = list(trees = list(igbp = c(igbp_file, c(1, 2)),
+                              cci  = c(cci__file, c(1,2))),
+                 wood  = list(igbp = c(igbp_file, c(1, 2, 5)),
+                              cci  = c(cci__file, c(1, 2, 5)),
+                              VCF = 'data/treecover2000-2014.nc'),
+                 shrub = list(igbp = c(igbp_file, c(5)),
+                              cci  = c(cci__file, c(5))),
+                 grass = list(igbp = c(igbp_file, c(3,4)),
+                              cci  = c(cci__file, c(2,4)),
+                              VCF = 'data/nontree2000-2014.nc'))
+
 out_dir = 'outputs/'
 
 file = paste('data/', job, file, sep = '/')
 run <- function(name, obs_file, lvls) {
-    
+    print(name)
     openDat <- function(lvl) {
         dat = dat0 = brick(file, varname = lvl)
         dates =  sapply(names(dat), function(i) strsplit(i, '.', fixed = TRUE)[[1]])
@@ -47,8 +54,9 @@ run <- function(name, obs_file, lvls) {
             dat = brick(obs[1])
             dat = sum(dat[[as.numeric(obs[-1])]])
         } else {
-            browser()
-            names(obs) = names(dati)
+            dat = brick(obs)
+            dat = dat[[c(seq(1, nlayers(dat), 12))[-1]]]            
+            names(dat) = names(dati)
         }
         dat[dat > 9E9] = NaN
         dat = convert_pacific_centric_2_regular(dat)
@@ -60,7 +68,7 @@ run <- function(name, obs_file, lvls) {
     obs = lapply(obs_file, processObs)
     
     print("outputting")
-    out_file = paste0(out_dir, job, '-', name, '-fracCover.nc')#paste0(out_dir, c(job, obs_file_out), '-', name, '-LAI.nc')
+    out_file = paste0(out_dir, job, '-', name, '-fracCover.nc')
     
     writeRaster(dati, out_file[1], overwrite = TRUE)
     
