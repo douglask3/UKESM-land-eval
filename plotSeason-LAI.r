@@ -16,15 +16,40 @@ graphics.off()
 global_extent = extent(c(-180, 180, -60, 90))
 
 files = c("Observation" = 'outputs/lai_0.5x0.5_2000-2005-LAI.nc',
-          "Simulation"  = "outputs/u-bb075-control-LAI.nc")
+          "Simulation"  = "outputs/u-az513-control-LAI.nc")
           
 Biomes = "outputs/full_biome_realms.nc"
-               
-regions = list('Eurasia Boreal\nForest' = c(-10, 180, 60, 90),
-               'Europe Northern Temperate\nForest' = c(-10, 40, 30, 60),
-               'Africa Northern Tropical\nForest' = c(-20, 50, 0, 30),
-               'Africa Southern Tropical\nForest' = c(-10, 50, -30, 0),
-               'South America Southern Temperate\nForest' = c(-80, 30, -60, -30))
+
+biome_names =  c("Australasia\nTropical Forest",        
+                 "South East\nAustralia Woodland",
+                 "Australia\nSavanna/grassland",
+                 "Australia\nMediterranean",
+                 "Australia\nDesert/shrubland",
+                 "Southern\nAfrica Tropical Forest",
+                 "Southern\nAfrica Savanna/grassland",
+                 "Southern\nAfrica Desert",
+                 "Northern\nAfrica Tropical Forests",
+                 "Northern\nAfrica Savanna/grassland",
+                 "Northern\nAfrica Desert",
+                 "Indo-Malay\nTropical Forest",
+                 "Indo-Malay\nDry tropical forest",
+                 "Southern\nAmerica Tropical Forest",
+                 "Southern\nAmerica Savanna/grassland",
+                 "Southern\nAmerica Desert",
+                 "Northern\nAmerica Tropical forest",
+                 "Northern\nAmerica temperate woodland",
+                 "Northern\nAmerica Savanna/grassland",
+                 "Northern\nAmerica Desert",
+                 "Northern\nAmerica Boreal Forest",
+                 "Northern\nAmerica tundra",
+                 "Eurasia\nTemperate forest/woodland",
+                 "Eurasia\nparkland/grass",
+                 "Mediterranean",
+                 "Eurasia\nDesert/scrub",
+                 "Eurasian\nBoreal forest",
+                 "Eurasian\nTundra")
+          
+
 axisMonth = c(2, 6, 4, 8)
 greens9   = c("#F7FFFB", "#DEF7EB", "#C6EFDB", "#9EE1CA", "#6BD6AE", 
             "#42C692", "#21B571", "#089C51", "#086B30")
@@ -43,10 +68,9 @@ limits_rank = seq(0, 0.9, 0.1)
 cols_rank = c('#ffffe5','#f7fcb9','#d9f0a3','#addd8e','#78c679','#41ab5d','#238443','#006837','#004529')
 
 Biomes = raster(Biomes)
-#ObsCover = convert_pacific_centric_2_regular(ObsCover)
-
 
 run <- function(name) {
+    
     obs = lapply(files, brick)
     mxLayers = min(sapply(obs, nlayers))
     obs = obs_ia =lapply(obs, function(i) i[[1:mxLayers]])
@@ -56,8 +80,11 @@ run <- function(name) {
 
     obs = lapply(obs, convert2Climatology)
     obs = lapply(obs, raster::crop, global_extent)
-
-
+    obs_in = obs
+    obs[[1]] = obs_in[[1]][[c(12, 1:11)]]
+    obs[[2]] = obs_in[[2]][[c(12, 1:11)]]
+    obs[[2]] = obs_in[[2]][[c(6:12, 1:6)]]
+    
     ModalMap <- function(obs, txt, addLegend, let) {
         modal = testModal(obs)
         modal_approx = layer.apply(2:6, function(i) modal[[i]] * (0.5-cos(2*pi * modal[[i+6]]/12)/2))
@@ -95,7 +122,7 @@ run <- function(name) {
     }
     
     fname = paste0("figs/fire_var_seasonality-maps-", name, ".png")
-    
+    if (FALSE) {
     png(fname, height = 110, width = 183, res = 300, units = 'mm')
         par(oma = c(1, 2, 1, 0))
         layout(cbind(c(1, 1, 6, 6, 7, 7), c(2, 3, 8, 8, 11, 11), c(2, 3, 8, 9, 9, 11), c(2, 3, 8, 8, 11, 11), c(4, 5, 10, 10, 12, 12)),
@@ -142,11 +169,7 @@ run <- function(name) {
         
         modals = mapply(ModalMap, obs, names(files), c(T, F), c('d', 'g')) 
         
-        obs_in = obs
-        obs[[1]] = obs_in[[1]][[c(12, 1:11)]]
-        #obs[[2]] = obs_in[[2]][[c(8:12, 1:7)]]
-        obs[[2]] = obs_in[[2]][[c(12, 1:11)]]
-        #obs[[2]] = obs_in[[2]][[c(6:12, 1:6)]]
+       
         
         pc = lapply(obs, PolarConcentrationAndPhase.RasterBrick, phase_units = "months")
 
@@ -162,36 +185,37 @@ run <- function(name) {
 
         mapply(plotConPhase, pc, list(c('e', 'f'), c('h', 'i')), c(TRUE, FALSE))  
     dev.off()    
-    
-    #writeRaster(pc[[1]], 'outputs/MODIS_pc.nc')
-    #writeRaster(modals[[1]], 'outputs/MODIS_modal.nc')
-    #writeRaster(aas[[1]], 'outputs/MODIS_aa.nc')
-
+    }
     plotRegion <- function(region, name, axisMonth) {
-        print(region)
-        obs = lapply(obs, function(i) layer.apply(i, function(j) {j[Biomes[]!= region | is.na(Biomes[])] = NaN; j}))
-        #obs = lapply(obs, raster::crop, extent(region))
-        #   ObsCover = raster::resample(ObsCover, obs[[1]][[1]])
+       
+        tempFile = paste0("temp/polarClim_for_regionID-", region, 
+                          tail(strsplit(files[2], '-')[[1]], 2)[1], ".Rd")
+        if (file.exists(tempFile)) {
+            load(tempFile)
+        } else {
+            print(region)
+            maskRegion <- function(j) {
+                j[Biomes[]!= region | is.na(Biomes[])] = NaN
+                return(j)
+            }
+         obs = lapply(obs, function(i) layer.apply(i, maskRegion))       
         
-        
-        #obs = lapply(obs, function(i) layer.apply(i, function(j) {j[sum(ObsCover[[1:2]]) < 0.5] = NaN; j}))
-        
-        #obs[ObsCover < 0.5] = NaN
-        
-        getQuants <- function(obs) {
-            obsv = layer.apply(obs, function(i) quantile(i, c(0.25, 0.5, 0.75)))  
-            obsv = matrix(unlist(obsv), nrow = 3)
-            return(obsv)
+            getQuants <- function(obs) {
+                obsv = layer.apply(obs, function(i) quantile(i, c(0.25, 0.5, 0.75)))  
+                obsv = matrix(unlist(obsv), nrow = 3)
+                return(obsv)
+            }
+            obsv = lapply(obs, getQuants)
+            maxObsV = sapply(obsv, max)
+            obsv = mapply('/', obsv, maxObsV, SIMPLIFY = FALSE)
+            save(obsv, maxObsV, file = tempFile)
         }
-        obsv = lapply(obs, getQuants)
-        maxObsV = sapply(obsv, max)
-        obsv = mapply('/', obsv, maxObsV, SIMPLIFY = FALSE)
-        
         xlim =  c(-1,1)
 
         polarPlot.setup(1:12, obsv[[1]][2,], type = 'l', xlim = xlim, col = 'blue', lwd = 2)
         polarPlot.lines(1:12, obsv[[2]][2,], col = "red", lwd = 2)
         polarPlot.addGuides(xlim = xlim, axisMonth = axisMonth, labScale = maxObsV[1], nguides = 4, col = "blue")
+        if (maxObsV[2] == 0 ) maxObsV[2] = maxObsV[1]
         polarPlot.addGuides(xlim = xlim, axisMonth = axisMonth+1, labScale = maxObsV[2], nguides = 4, col = "red")
 
         polarPlot.polygon(1:12, obsv[[1]][c(1, 3),], col = 'blue', alpha = 0.67, border = TRUE)
@@ -208,7 +232,8 @@ run <- function(name) {
         layout(lmat, heights = c(rep(1, nrow(lmat)), 0.3))
         par(mar = c(0, 0, 3, 1.5))
         
-        obsv = mapply(plotRegion, index, paste(letters[1:length(index)],  index, sep = ') '),
+        obsv = mapply(plotRegion, index,
+                      paste(letters[1:length(index)], biome_names, sep = ') '),
                       axisMonth, SIMPLIFY = FALSE)
         par(mar = c(2, 3, 2, 0))
         plot(c(0, 1), c(0,1), type = 'n', axes = FALSE, xlab = '', ylab = '')
@@ -219,11 +244,11 @@ run <- function(name) {
 
 run("control")
 
-files[2] = "outputs/u-bb075-trees-LAI.nc"
+files[2] = "outputs/u-az513-trees-LAI.nc"
 run("trees")
 
-files[2] = "outputs/u-bb075-obsVegDist-LAI.nc"
+files[2] = "outputs/u-az513-obsVegDist-LAI.nc"
 run("obsVegDist")
 
-files[2] = "outputs/u-bb075-trees-obsVegDist-LAI.nc"
+files[2] = "outputs/u-az513-trees-obsVegDist-LAI.nc"
 run("obsVegDist-trees")
