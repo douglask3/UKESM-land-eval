@@ -1,9 +1,9 @@
 library(raster)
 library(rasterExtras)
 source("libs/convert_pacific_centric_2_regular.r")
-job = 'u-bb075'
 
-files = c(LAI = 'LAI-19014.nc', FPC = 'VegFracs-19013.nc')
+sim_dirs = c(LAI = 'data/LAI/', VegFracs = 'data/vegFrac/')
+#files = c(LAI = 'LAI-19014.nc', vegFrac = 'VegFracs-19013.nc')
 
 years = 2000:2006
 
@@ -14,7 +14,7 @@ out_dir = 'outputs/'
 dat_file = 'data/lai_0.5x0.5_2000-2005.nc'
 obs_file_out = 'lai_0.5x0.5_2000-2005'
 
-run <- function(name) {
+run <- function(name, files, job) {
     obs = brick(dat_file)
 
     openDat <- function(file, years) {
@@ -31,7 +31,7 @@ run <- function(name) {
         dat = lapply(levels, function(i)  brick(file, varname = i)[[index]])#brick(file, varname = i)[[index]])
     }
     print("opening")
-    dat = lapply(paste('data', job, files, sep ='/'), openDat, years)
+    dat = lapply(files, openDat, years)
     
     print("grid box LAI")
     dati = dat[[1]][[1]]
@@ -75,15 +75,33 @@ run <- function(name) {
     writeRaster(dati, out_file[1], overwrite = TRUE)
     writeRaster(obs , out_file[2], overwrite = TRUE)
 }
+findJobs <- function(sim_dir, pattern)
+    sapply(list.files(sim_dir), function(i) strsplit(i, paste0("-", pattern))[[1]][1])
 
-run('control')
-files0 = files
-files[2] = '../vegfrac_igbp.nc'
-run('obsVegDist')
+jobs = mapply(findJobs, sim_dirs, names(sim_dirs))
+jobs = jobs[[1]][sapply(jobs[[1]], function(i) any(i == jobs[[2]]))]
+makeJob <- function(job) {
+    findFiles <- function(sim_dir) {
+        files = list.files(sim_dir, full.names = TRUE)
+        file = files[grepl(job, files)]
+        return(file)
+    }
+    files = sapply(sim_dirs, findFiles)
+    
+    runi <- function(name) run(name, files, job)
 
-levels = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET")
-layers = c(1    , 1       , 1       , 2    , 2    )
-run('trees-obsVegDist')
+    runi('control')
 
-files = files0
-run('trees')
+    files0 = files
+    files[2] = '../vegfrac_igbp.nc'
+    runi('obsVegDist')
+
+    levels = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET")
+    layers = c(1    , 1       , 1       , 2    , 2    )
+    runi('trees-obsVegDist')
+
+    files = files0
+    runi('trees')
+}
+
+lapply(jobs, makeJob)
