@@ -1,8 +1,8 @@
 library(raster)
 library(rasterExtras)
 source("libs/convert_pacific_centric_2_regular.r")
-job = 'u-bb075'
 
+sim_dir = 'data/vegFrac/'
 file = 'VegFracs-19013.nc'
 
 years = 2001:2013
@@ -29,7 +29,7 @@ obs_files = list(trees = list(igbp = c(igbp_file, c(1, 2)),
 out_dir = 'outputs/'
 
 file = paste('data/', job, file, sep = '/')
-run <- function(name, obs_file, lvls) {
+run <- function(name, obs_file, lvls, file, job) {
     print(name)
     openDat <- function(lvl) {
         dat = dat0 = brick(file, varname = lvl)
@@ -75,5 +75,12 @@ run <- function(name, obs_file, lvls) {
     out_file = paste0(out_dir, names(obs_file), '-', name, '-fracCover.nc')
     mapply(writeRaster, obs , out_file, overwrite = TRUE)
 }
+jobs = sapply(list.files(sim_dir), function(i) strsplit(i, "-V")[[1]][1])
 
-mapply(run, names(levels), obs_files, levels)
+files = list.files(sim_dir, full.names = TRUE)
+makeJob <- function(job) {
+    file = files[grepl(job, files)]
+    mapply(run, names(levels), obs_files, levels, MoreArgs = list(file, job))
+}
+
+lapply(jobs, makeJob)
