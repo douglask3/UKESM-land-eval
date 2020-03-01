@@ -15,7 +15,7 @@ graphics.off()
 #dati = dat[[1]]
 #for (di in dat[-1]) dati = addLayer(dati, di)
 
-dat =  readOGR(dsn = "data/biome/wwf_terr_ecos_oRn.shp")
+dat =  readOGR(dsn = "data/biome", layer = "wwf_terr_ecos_oRn")
 
 #ext  = extent (-180, 180, -90, 90)
 #xy   = abs(apply(as.matrix(bbox(ext)), 1, diff))
