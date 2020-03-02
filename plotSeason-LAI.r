@@ -9,6 +9,7 @@ source("libs/srank.raster.r")
 source("libs/plotAA.r")
 source("libs/plotConPhase.r") 
 source("libs/convert2Climatology.r")
+source("libs/loadRegionInfo.r")
 library("plotrix")
 library(maps)
 
@@ -23,45 +24,11 @@ global_extent = extent(c(-180, 180, -60, 90))
 files = c("Observation" = 'outputs/lai_0.5x0.5_2000-2005-LAI.nc',
           "Simulation"  = "outputs/u-az513-control-LAI.nc")
           
-Biomes = "outputs/full_biome_realms.nc"
-
-biome_names =  c("Australasia\nTropical Forest",        
-                 "South East\nAustralia Woodland",
-                 "Australia\nSavanna/grassland",
-                 "Australia\nMediterranean",
-                 "Australia\nDesert/shrubland",
-                 "Southern\nAfrica Tropical Forest",
-                 "Southern\nAfrica Savanna/grassland",
-                 "Southern\nAfrica Desert",
-                 "Northern\nAfrica Tropical Forests",
-                 "Northern\nAfrica Savanna/grassland",
-                 "Northern\nAfrica Desert",
-                 "Indo-Malay\nTropical Forest",
-                 "Indo-Malay\nDry tropical forest",
-                 "Southern\nAmerica Tropical Forest",
-                 "Southern\nAmerica Savanna/grassland",
-                 "Southern\nAmerica Desert",
-                 "Northern\nAmerica Tropical forest",
-                 "Northern\nAmerica temperate woodland",
-                 "Northern\nAmerica Savanna/grassland",
-                 "Northern\nAmerica Desert",
-                 "Northern\nAmerica Boreal Forest",
-                 "Northern\nAmerica tundra",
-                 "Eurasia\nTemperate forest/woodland",
-                 "Eurasia\nparkland/grass",
-                 "Mediterranean",
-                 "Eurasia\nDesert/scrub",
-                 "Eurasian\nBoreal forest",
-                 "Eurasian\nTundra")
-          
-
 axisMonth = c(2, 6, 4, 8)
 greens9   = c("#F7FFFB", "#DEF7EB", "#C6EFDB", "#9EE1CA", "#6BD6AE", 
             "#42C692", "#21B571", "#089C51", "#086B30")
 
 units_aa = ''                
-
-Biomes = raster(Biomes)
 
 run <- function(name) {    
     obs = lapply(files, brick)
@@ -126,7 +93,7 @@ run <- function(name) {
         } else {
             print(region)
             maskRegion <- function(j) {
-                j[Biomes[]!= region | is.na(Biomes[])] = NaN
+                j[regions[]!= region | is.na(regions[])] = NaN
                 return(j)
             }
             obs = lapply(obs, function(i) layer.apply(i, maskRegion))       
@@ -156,7 +123,7 @@ run <- function(name) {
     }
     fname = paste0("figs/fire_var_seasonality-TS-", name, ".png")
     
-    index =  unique(Biomes)
+    index =  unique(regions)
     lmat = rbind(t(matrix(index, nrow = 4)), 29)
     png(fname, height = 183*nrow(lmat)/ncol(lmat), width = 183, res = 300, units = 'mm')    
         
@@ -164,7 +131,7 @@ run <- function(name) {
         par(mar = c(0, 0, 3, 1.5))
         
         obsv = mapply(plotRegion, index,
-                      paste(letters[1:length(index)], biome_names, sep = ') '),
+                      paste(letters[1:length(index)], region_names, sep = ') '),
                       axisMonth, SIMPLIFY = FALSE)
         par(mar = c(2, 3, 2, 0))
         plot(c(0, 1), c(0,1), type = 'n', axes = FALSE, xlab = '', ylab = '')

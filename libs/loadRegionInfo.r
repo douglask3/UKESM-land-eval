@@ -1,0 +1,32 @@
+regions = "outputs/full_biome_realms.nc"
+
+region_names =  c("Australasia\nTropical Forest",        
+                 "South East\nAustralia Woodland",
+                 "Australia\nSavanna/grassland",
+                 "Australia\nMediterranean",
+                 "Australia\nDesert/shrubland",
+                 "Southern\nAfrica Tropical Forest",
+                 "Southern\nAfrica Savanna/grassland",
+                 "Southern\nAfrica Desert",
+                 "Northern\nAfrica Tropical Forests",
+                 "Northern\nAfrica Savanna/grassland",
+                 "Northern\nAfrica Desert",
+                 "Indo-Malay\nTropical Forest",
+                 "Indo-Malay\nDry tropical forest",
+                 "Southern\nAmerica Tropical Forest",
+                 "Southern\nAmerica Savanna/grassland",
+                 "Southern\nAmerica Desert",
+                 "Northern\nAmerica Tropical forest",
+                 "Northern\nAmerica temperate woodland",
+                 "Northern\nAmerica Savanna/grassland",
+                 "Northern\nAmerica Desert",
+                 "Northern\nAmerica Boreal Forest",
+                 "Northern\nAmerica tundra",
+                 "Eurasia\nTemperate forest/woodland",
+                 "Eurasia\nparkland/grass",
+                 "Mediterranean",
+                 "Eurasia\nDesert/scrub",
+                 "Eurasian\nBoreal forest",
+                 "Eurasian\nTundra")
+
+regions = raster(regions)
