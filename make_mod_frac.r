@@ -10,27 +10,35 @@ years = 2001:2013
 levels = list(trees = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET"),
               wood  = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET", "DSH", "ESH"),
               shrub = c("DSH", "ESH"),
-              grass = c("C3G", "C4G", "C3C", "C4C", "C3P", "C4P"))
+              herb  = c("DSH", "ESH", "C3G", "C4G", "C3C", "C4C", "C3P", "C4P"),
+              grass = c("C3G", "C4G", "C3C", "C4C", "C3P", "C4P"),
+              bares = c("Bare_soil"))
         
 igbp_file = 'data/vegfrac_igbp.nc'
 cci__file = 'data/vegfrac_refLC_refCW.nc'
 
 obs_files = list(trees = list(igbp = c(igbp_file, c(1, 2)),
-                              cci  = c(cci__file, c(1,2))),
-                 wood  = list(igbp = c(igbp_file, c(1, 2, 5)),
-                              cci  = c(cci__file, c(1, 2, 5)),
+                              cci  = c(cci__file, c(1,2)),
                               VCF = 'data/treecover2000-2014.nc'),
+                 wood  = list(igbp = c(igbp_file, c(1, 2, 5)),
+                              cci  = c(cci__file, c(1, 2, 5))),
                  shrub = list(igbp = c(igbp_file, c(5)),
                               cci  = c(cci__file, c(5))),
+                 herb  = list(igbp = c(igbp_file, c(3:5)),
+                              cci  = c(cci__file, c(3:5)),
+                              VCF = 'data/nontree2000-2014.nc'),
                  grass = list(igbp = c(igbp_file, c(3,4)),
-                              cci  = c(cci__file, c(2,4)),
-                              VCF = 'data/nontree2000-2014.nc'))
+                              cci  = c(cci__file, c(3,4))),
+                 bare = list(igbp = c(igbp_file, c(8)),
+                              cci  = c(cci__file, c(8)),
+                              VCF = 'data/bareground2000-2014.nc'))
 
 out_dir = 'outputs/'
 
-file = paste('data/', job, file, sep = '/')
-run <- function(name, obs_file, lvls, file, job) {
+
+run <- function(name, obs_file, lvls, file, job) { 
     print(name)
+    print(job)
     openDat <- function(lvl) {
         dat = dat0 = brick(file, varname = lvl)
         dates =  sapply(names(dat), function(i) strsplit(i, '.', fixed = TRUE)[[1]])
@@ -52,7 +60,8 @@ run <- function(name, obs_file, lvls, file, job) {
     processObs <- function(obs) {
         if (length(obs) > 1) {
             dat = brick(obs[1])
-            dat = sum(dat[[as.numeric(obs[-1])]])
+            levels = as.numeric(obs[-1])
+            dat = sum(dat[[levels]])
         } else {
             dat = brick(obs)
             dat = dat[[c(seq(1, nlayers(dat), 12))[-1]]]            
