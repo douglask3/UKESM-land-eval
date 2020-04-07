@@ -1,9 +1,6 @@
-library(raster)
-library(rasterExtras)
-source("libs/convert_pacific_centric_2_regular.r")
+source("cfg.r")
 
-sim_dirs = c(LAI = 'data/LAI/', VegFracs = 'data/vegFrac/')
-#files = c(LAI = 'LAI-19014.nc', vegFrac = 'VegFracs-19013.nc')
+file_ids = c(LAI = 'LAI-19014.nc', vegFrac = 'VegFracs-19013.nc')
 
 years = 2000:2006
 
@@ -78,15 +75,13 @@ run <- function(name, files, job) {
 findJobs <- function(sim_dir, pattern)
     sapply(list.files(sim_dir), function(i) strsplit(i, paste0("-", pattern))[[1]][1])
 
-jobs = mapply(findJobs, sim_dirs, names(sim_dirs))
-jobs = jobs[[1]][sapply(jobs[[1]], function(i) any(i == jobs[[2]]))]
+#jobs = mapply(findJobs, sim_dirs, names(sim_dirs))
+#jobs = jobs[[1]][sapply(jobs[[1]], function(i) any(i == jobs[[2]]))]
 makeJob <- function(job) {
-    findFiles <- function(sim_dir) {
-        files = list.files(sim_dir, full.names = TRUE)
-        file = files[grepl(job, files)]
-        return(file)
-    }
-    files = sapply(sim_dirs, findFiles)
+    findFiles <- function(id)
+        mod_files[grepl(id, mod_files) & grepl(job, mod_files)]
+
+    files = sapply(file_ids, findFiles)
     
     runi <- function(name) run(name, files, job)
 

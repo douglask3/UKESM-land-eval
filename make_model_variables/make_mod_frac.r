@@ -1,8 +1,5 @@
-library(raster)
-library(rasterExtras)
-source("libs/convert_pacific_centric_2_regular.r")
+source("cfg.r")
 
-sim_dir = 'data/vegFrac/'
 file = 'VegFracs-19013.nc'
 
 years = 2001:2013
@@ -33,26 +30,21 @@ obs_files = list(trees = list(igbp = c(igbp_file, c(1, 2)),
                               cci  = c(cci__file, c(8)),
                               VCF = 'data/bareground2000-2014.nc'))
 
-out_dir = 'outputs/'
-
+out_dir = 'outputs/veg_frac/'
+makeDir(out_dir)
 
 run <- function(name, obs_file, lvls, file, job) { 
     print(name)
     print(job)
     openDat <- function(lvl) {
-        dat = dat0 = brick(file, varname = lvl)
-        dates =  sapply(names(dat), function(i) strsplit(i, '.', fixed = TRUE)[[1]])
-        yrs = sapply(dates[1,], function(i) strsplit(i, 'X')[[1]][2])
-        index = apply(sapply(years, '==', yrs), 2, which)
-        dat = layer.apply(index, function(i) mean(dat[[i]]))
-        names(dat) = paste0('X', years)
+        dat = brick(file, varname = lvl)        
+        dat =  getYrsFromLayers(dat)        
         return(dat)
     }
     
     dat = lapply(lvls, openDat)
     for (r in dat[-1]) dat[[1]] = dat[[1]] + r
-    dat = dat[[1]]
-    
+    dat = dat[[1]]    
     
     print("regridding")
     dati = convert_pacific_centric_2_regular(dat)
@@ -84,9 +76,10 @@ run <- function(name, obs_file, lvls, file, job) {
     out_file = paste0(out_dir, names(obs_file), '-', name, '-fracCover.nc')
     mapply(writeRaster, obs , out_file, overwrite = TRUE)
 }
-jobs = sapply(list.files(sim_dir), function(i) strsplit(i, "-V")[[1]][1])
+#jobs = sapply(list.files(sim_dir), function(i) strsplit(i, "-V")[[1]][1])
 
-files = list.files(sim_dir, full.names = TRUE)
+
+files = mod_files[grepl(file, mod_files)]
 makeJob <- function(job) {
     file = files[grepl(job, files)]
     mapply(run, names(levels), obs_files, levels, MoreArgs = list(file, job))
