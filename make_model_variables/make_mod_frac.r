@@ -38,7 +38,7 @@ run <- function(name, obs_file, lvls, file, job) {
     print(job)
     openDat <- function(lvl) {
         dat = brick(file, varname = lvl)        
-        dat =  getYrsFromLayers(dat)        
+        dat =  getYrsFromLayers(dat, years)        
         return(dat)
     }
     
