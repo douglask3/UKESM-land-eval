@@ -203,6 +203,11 @@ biomeOnly = makeSub(7)
 biomeOnly[biomeOnly ==5 & RealmOnly == 7] = 7
 biomeOnly[biomeOnly ==5 & RealmOnly == 9] = 7
 
-writeRaster(biomesR, file = "outputs/full_biome_realms.nc", overwrite=TRUE)
+
+writeRaster(biomesR  , file = "outputs/full_biome_realms.nc", overwrite=TRUE)
 writeRaster(biomeOnly, file = "outputs/biomes.nc", overwrite=TRUE)
 writeRaster(RealmOnly, file = "outputs/realms.nc", overwrite=TRUE)
+
+
+biomesR = convert_regular_2_pacific_centric(biomesR)
+writeRaster(biomesR  , file = "outputs/full_biome_realms_pacific_centric.nc", overwrite=TRUE)
