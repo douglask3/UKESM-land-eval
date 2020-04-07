@@ -38,16 +38,16 @@ run <- function(name, obs_file, lvls, file, job) {
     print(job)
     openDat <- function(lvl) {
         dat = brick(file, varname = lvl)        
-        dat =  getYrsFromLayers(dat, years)        
+        dat =  getYrsFromLayers(dat, years)    
         return(dat)
     }
     
     dat = lapply(lvls, openDat)
     for (r in dat[-1]) dat[[1]] = dat[[1]] + r
-    dat = dat[[1]]    
+    dati = dat[[1]]    
     
-    print("regridding")
-    dati = convert_pacific_centric_2_regular(dat)
+    #print("regridding")
+    #dati = convert_pacific_centric_2_regular(dat)
     
     processObs <- function(obs) {
         if (length(obs) > 1) {
