@@ -16,7 +16,8 @@ obs_files = c(IGBP = "igbp", CCI = "cci", VCF = "VCF")
 
 jobs = c("u-az513", "u-az515", "u-az524", "u-bb277", "u-bc179", "u-bc292", "u-bc370", "u-bc470", "u-bd288", "u-bd416", "u-bd483")[1:3]
 
-vars = c("tree", "wood", "shrub", "grass")
+vars = c(Tree = "tree", Wood = "wood", Shrub = "shrub", Herb = "herb", Grass = "grass",
+         "Bare Soil" = "bares")
 
 limits = seq(0, 0.9, 0.1)*100
 cols = c('#ffffe5','#f7fcb9','#d9f0a3','#addd8e','#78c679','#41ab5d','#238443','#006837','#004529')
@@ -107,7 +108,7 @@ areaWmean <- function(r) {
 }
 
 
-plotVariable <- function(var) {
+plotVariable <- function(var, vname) {
      files = files[grepl(var, files)]
 
     openFile <- function(nm, nmtext, plotMe = TRUE) {
@@ -115,7 +116,7 @@ plotVariable <- function(var) {
         addText <- function() {
             if (var == vars[[1]]) mtext(nmtext, side = 3)
             if (nm == obs_files[1]) {
-                mtext(var, side = 2)
+                mtext(vname, side = 2)
                 #if (var == vars[length(vars)])
                     
             }
@@ -131,7 +132,8 @@ plotVariable <- function(var) {
         dat = brick(file)
         if (nlayers(dat) == 1) dat = dat[[1]] else dat = mean(dat)
         dat = raster::crop(dat, c(-180, 180, -60, 90))
-        if (nm == "VCF") dat = dat/100
+        if (nm == "VCF" && var != "bares") dat = dat/100
+        if (var == "bares") dat = 1 - dat
         if (plotMe) {
             plotStandardMap(dat*100, cols = cols, limits = limits)
             addText()
@@ -139,7 +141,6 @@ plotVariable <- function(var) {
         return(dat)
     }
     obss = mapply(openFile, obs_files, names(obs_files))
-    
     obss = obss[!sapply(obss, is.null)]
     
     sims = lapply(jobs, openFile, plotMe = FALSE)
@@ -185,7 +186,14 @@ plotVariable <- function(var) {
         fname = paste0("docs/", var, '-', name, "-MM-summ.csv")
         tab_ens = round(tab_ens, 3)
         write.csv(tab_ens, file = fname)
+
+        #ens_range = cbind(tab_ens[, 4] - tab_ens[, 5], tab_ens[, 4] + tab_ens[, 5])
+        nulls = cbind(tab_ens[,6:7], tab_ens[,8] - tab_ens[,9], tab_ens[,8] + tab_ens[,9])
+        index = 1:ncol(nulls)
         
+        nbeats = apply(cbind(nulls, tab_ben), 1,
+                       function(i) sum(sapply(i[-index], '<', i[index])))
+        return(nbeats)    
     }
     bench = mapply(benchmarkObs, obss, names(obss))
     #name = paste0("docs/", var, "-MM-full.csv")
@@ -198,26 +206,55 @@ plotVariable <- function(var) {
     #fname = paste0("docs/", var, "-MM-summ.csv")
     #tabi = round(tabi, 3)
     #write.csv(tabi, file = fname)
-    return(list(obss, sims))
+    return(list(obss, sims, bench))
 }
 
-png("figs/vegDist.png", height = 183/2, width = 183, units = 'mm', res = 450)
-    layout(rbind(t(matrix(1:16, nrow = 4, ncol = 4)), 17), heights = c(1, 1, 1, 1, 0.3))
+png("figs/vegDist.png", height = 3 * 183/4, width = 183, units = 'mm', res = 450)
+    layout(rbind(t(matrix(1:24, nrow = 4)), 25), heights = c(1, 1, 1, 1, 1, 1, 0.3))
     par( mar = rep(0,4), oma = rep(1.5, 4))
-    out = lapply(vars, plotVariable)
+    out = mapply(plotVariable, vars, names(vars))
     StandardLegend(cols, limits, out[[1]][[1]][[1]], extend_max = FALSE,
                    maxLab = 100, add = FALSE)
 dev.off()
+
+scores = out[3,]
+
+png("figs/MMscoreCols.png", height = 15, width = 5, units = 'in', res = 300)
+plot(c(-2, length(scores) + 0.5), c(-3, 29.5), axes = FALSE, xaxt = 'n', yaxt = 'n', xlab = '', ylab = '')
+text(y = 0, x = 1:6,  names(vars))
+text(y = 1:29, x = 0, adj = 1, xpd = TRUE, c("Global", region_names), srt = 0)
+
+bcols = make_col_vector(c('#a50026', '#fee090', '#313695'), ncol = 13)
+addScoreCols <- function(score, x_main) {
+    addCol <- function(rn) {
+        cs = score[rn,]
+        if (length(cs) == 2) {
+            xs = list(c(-0.5, 0.5, -0.5), c(-0.5, 0.5, 0.5))
+            ys = list(c(-0.5, 0.5, 0.5), c(-0.5, 0.5, -0.5))
+        } else {
+            xs = list(c(0, -0.5, -0.5, 0), c(0, 0.5, 0.5, 0), c(0, -0.5, 0.5))
+            ys = list(c(0, -0.5, 0.5, 0.5), c(0, -0.5, 0.5, 0.5), c(0, -0.5, -0.5))
+        }
+        addPoly <- function(xs, ys, col) 
+            polygon(x_main + xs, rn + ys, col = col)
+        mapply(addPoly, xs, ys, bcols[cs+1])
+    }
+    
+    lapply(1:nrow(score), addCol)
+}
+mapply(addScoreCols, scores, 1:length(scores))
+dev.off()
+browser()
 itemComparison <- function(obs_name) {
-    if(any(names(out[[1]][[1]])==obs_name)) index = c(1, 3, 4) else index = c(2, 4)
+    if(any(names(out[[2]][[1]])==obs_name)) index = c(1, 3, 5, 6) else index = c(1, 4, 6)
     makeItemObs <- function(i) out[[i]][[1]][[which(names(out[[i]][[1]]) == obs_name)]]
     obsi = layer.apply(index, makeItemObs)
-    obsi = addLayer(obsi, 1 - sum(obsi))
+    #obsi = addLayer(obsi, 1 - sum(obsi))
     
     makeItemsMod <- function(mno) {
        makeItemMod <- function(i)  out[[i]][[2]][[mno]]
        modi = layer.apply(index, makeItemMod)
-       modi = addLayer(modi, 1-sum(modi))
+       #modi = addLayer(modi, 1-sum(modi))
        return(modi)
     }       
     modsi = lapply(1:length(out[[1]][[2]]), makeItemsMod)
@@ -228,8 +265,8 @@ itemComparison <- function(obs_name) {
                compmn(obsi, median.raster), compmn(obsi), compRR(obsi))
     colnames(scores) = c(jobs, 'UKESM-mean', 'UKESM-sd',
                       'median', 'mean', 'randomly-resampled mean', 'randomly-resampled sd')
-
-    tab = round(t(scores), 3)
+    
+    tab = round(scores, 3)
 
     tabFull = tab[,c(1:(ncol(tab)-6), (ncol(tab)-3):ncol(tab))]
     write.csv(tabFull, file = paste0("docs/items-", obs_name, "-MM-full.csv"))
