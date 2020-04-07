@@ -1,20 +1,10 @@
-library(raster)
-source("libs/plotStandardMap.r")
-source("libs/addLetLab.r")
-source("libs/sd.raster.r")
+source("cfg.r")
 library("plotrix")
-source("libs/loadRegionInfo.r")
 library(maps)
 
-library(raster)
-library(rasterExtras)
-source("../gitProjectExtras/gitBasedProjects/R/sourceAllLibs.r")
-sourceAllLibs("../rasterextrafuns/rasterPlotFunctions/R/")
 graphics.off()
 
 obs_files = c(IGBP = "igbp", CCI = "cci", VCF = "VCF")
-
-jobs = c("u-az513", "u-az515", "u-az524", "u-bb277", "u-bc179", "u-bc292", "u-bc370", "u-bc470", "u-bd288", "u-bd416", "u-bd483")[1:3]
 
 vars = c(Tree = "tree", Wood = "wood", Shrub = "shrub", Herb = "herb", Grass = "grass",
          "Bare Soil" = "bares")
