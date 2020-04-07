@@ -71,10 +71,10 @@ run <- function(name, obs_file, lvls, file, job) {
     print("outputting")
     out_file = paste0(out_dir, job, '-', name, '-fracCover.nc')
     
-    writeRaster(dati, out_file[1], overwrite = TRUE)
+    writeRaster.Standard(dati, out_file[1])
     
     out_file = paste0(out_dir, names(obs_file), '-', name, '-fracCover.nc')
-    mapply(writeRaster, obs , out_file, overwrite = TRUE)
+    mapply(writeRaster.Standard, obs , out_file)
 }
 #jobs = sapply(list.files(sim_dir), function(i) strsplit(i, "-V")[[1]][1])
 

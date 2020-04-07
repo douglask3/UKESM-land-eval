@@ -6,7 +6,8 @@ years = 2000:2006
 
 levels = c("BDT", "BET-Tr", "BET-Te", "NDT", "NET", "DSH", "ESH", "C3G", "C4G", "C3C", "C4C", "C3P", "C4P")
 layers = c(1    , 1       , 1       , 2    , 2    , 5    , 5    , 3    , 4    , 3    , 4    , 3    , 4    )
-out_dir = 'outputs/'
+out_dir = 'outputs/LAI/'
+makeDir(out_dir)
 
 dat_file = 'data/lai_0.5x0.5_2000-2005.nc'
 obs_file_out = 'lai_0.5x0.5_2000-2005'
