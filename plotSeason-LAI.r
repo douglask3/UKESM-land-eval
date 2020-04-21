@@ -74,8 +74,19 @@ run <- function(name) {
         
         par(mar = rep(0, 4)) 
         
-        aas = mapply(plotAA, obs, c('b', 'c'), names(files), units = units_aa)
-        
+        aas = mapply(plotAA, obs, c('b', 'c'), names(files),
+                     units = units_aa)
+
+        scoresRegion <- function(region, r, regions) {
+            if (!is.nan(region)) {
+                r[[1]][regions != region] = NaN
+                r[[2]][regions != region] = NaN
+            }
+            
+            score(NME(r[[1]], r[[2]], w = raster::area(r[[1]])))
+        }
+        aa_scores = sapply(c(NaN, 1:28), scoresRegion, aas, regions) 
+        browser()
         srank.month = srank.raster(obs_ia[[1]], obs_ia[[2]], 'j', 'monthly rank')
         srank.annual = srank.raster(obs_ia[[1]], obs_ia[[2]], 'j', 'monthly rank')
         
