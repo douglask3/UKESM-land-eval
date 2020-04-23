@@ -4,13 +4,14 @@ aa_cols = c('#ffffe5','#f7fcb9','#d9f0a3','#addd8e','#78c679','#41ab5d',
 
 
 plotAA <- function(r, lab = '', name = '', units = '',
-                   cols = aa_cols, limits = limits_aa, regions = NULL) {
+                   cols = aa_cols, limits = limits_aa, regions = NULL,
+                   addLegend = FALSE) {
     aa = mean(r)        
-    plotStandardMap(aa, limits = limits_aa, cols = aa_cols)
+    plotStandardMap(aa, limits = limits, cols = cols)
     mtext(name, side = 2, adj = 0.9, line = -0.2)
     addLetLab(lab)
-    StandardLegend(aa, limits = limits_aa, cols = aa_cols, units = units,
-                   add = TRUE, oneSideLabels = FALSE)
+    if (addLegend) StandardLegend(aa, limits = limits, cols = cols, units = units,
+                                  add = TRUE, oneSideLabels = FALSE)
 
     return(aa)
 }
