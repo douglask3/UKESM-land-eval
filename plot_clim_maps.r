@@ -43,7 +43,16 @@ mtextLabs <- function(let, lab, var)
 plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) {
     #aa = stack(file[[1]]) * scale
     #plotAA(aa, cols = cols, limits = limits, ...)
-    clims = lapply(file[["Clim"]], brick)
+    if (length(file) == 1) {
+        clims = list(brick(make_obs_climateology(file)))
+        dat = brick(make_obs_phaseConc(file))
+        phase = dat[[1]]
+        conc = dat[[2]]
+    } else {
+        clims = lapply(file[["Clim"]], brick)
+        conc = stack(file[['Concentration']])
+        phase = stack(file[[2]])
+    }
     modals = layer.apply(clims, Modalise)  
     mask = raster('data/seamask.nc')
     mask = raster::resample(mask, modals[[1]]) == 0
@@ -52,7 +61,6 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
     mtextLabs(labs[1], names, ' modality')
     if (addLegend) ModalLegend(modals[[1]]) 
 
-    conc = stack(file[['Concentration']])
     conc = layer.apply(conc, function(i) {i[mask] = NaN; i})
     conc = layer.apply(conc, function(i) {i = i - min.raster(i, na.rm = TRUE); i/max.raster(i, na.rm = TRUE)})
     plotStandardMap(conc, limits = conc_lims, cols = conc_cols, limits_error = quantile(sd.raster(conc), c(0.1, 0.5)))
@@ -62,12 +70,17 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
     climAll = clims[[1]]    
     for (f in clims[-1]) climAll = climAll + f
     
-    phase_mean = PolarConcentrationAndPhase(climAll, phase_units = 'months', justPhase = TRUE)
-    phase = stack(file[[2]])
-    phase_mode0 = round(phase)
+    if (nlayers(phase) > 1) {
+        phase_mean = PolarConcentrationAndPhase(climAll, phase_units = 'months',
+                                                justPhase = TRUE)
+        phase_mode0 = round(phase)
      
-    phase_mode = getmode.raster(phase_mode0)
-    phase_e = 1 - mean(phase_mode == phase_mode0)
+        phase_mode = getmode.raster(phase_mode0)
+        phase_e = 1 - mean(phase_mode == phase_mode0)
+    } else {
+        phase_mean = phase
+        phase_e = NULL
+    }
     plotStandardMap(phase_mean, limits = phase_lims, cols = phase_cols, e = phase_e, limits_error = c(0.1, 0.2))
     mtextLabs(labs[3], names, ' phase')
     if (addLegend) SeasonLegend(phase_lims, cols = phase_cols, add = FALSE, mar = rep(0, 4))
@@ -116,26 +129,28 @@ plotStuff <- function(name, files, scales, ...) {
         layout(cbind(c(1, 2, 3, 3, 8, 8), c(1, 2, 3, 4, 8, 9),
                     c(1, 2, 3, 3, 8, 8), c(5, 6, 7, 7, 0, 0)),
                heights = c(1, 1, 0.6, 0.4, 0.6, 0.4), width = c(0.45, 0.45, 0.1, 1))
-        par(mar = rep(0, 4))
+        par(mar = rep(0, 4), oma = c(0, 0, 0.5, 0))
         phase = mapply(plotClimVar,files, cols, limits, scales,
                        addLegend = c(T, F), names = c('Precip', 'Temp'),
                        labs = list(letters[c(1, 3, 5)], letters[c(2, 4, 6)]), ...)
         dphase = layer.apply(1:nlayers(phase[[1]]), function(i)
                             calPhaseDiff(c(phase[[1]][[i]], phase[[2]][[i]])))
-        dphase_mean = mean.phase.raster(dphase)
-        phase_mode0 = round(dphase)
+        if (nlayers(dphase) > 1) {
+            dphase_mean = mean.phase.raster(dphase)
+            phase_mode0 = round(dphase)
     
-        phase_mode = getmode.raster(phase_mode0)
-        phase_e = 1 - mean(phase_mode == phase_mode0)
-
+            phase_mode = getmode.raster(phase_mode0)
+            phase_e = 1 - mean(phase_mode == phase_mode0)
+        } else {
+            dphase_mean = dphase
+            phase_e = NULL
+        }
         plotStandardMap(dphase_mean, limits = dphase_lims, cols = dphase_cols,
                         e = phase_e, limits_error = c(0.1, 0.2))
         mtextLabs(letters[7], 'Phase', ' difference')
         SeasonLegend(c(0.5:5.5,-5.5:-0.5), cols = dphase_cols, add = FALSE, mar = rep(0, 4))
-    dev.off()
+    dev.off.gitWatermark(comment = 'DRAFT')
 }
 
 plotStuff("UKESM", sim_clim_files, mod_scale)
-
-
-#plotStuff("CRUTS4.01", obs_clim_files, obs_scale)
+plotStuff("CRUTS4.01", obs_clim_files, obs_scale)
