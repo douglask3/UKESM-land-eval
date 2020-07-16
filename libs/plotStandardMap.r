@@ -2,7 +2,7 @@ source("libs/return_multiple_from_functions.r")
 library(mapproj)
 
 plotStandardMap <- function(x, txt = '', limits, cols, e = NULL, recrop_e = TRUE, 
-                            y_range = c(-60, 90),...) {
+                            y_range = c(-60, 90), limits_error = c(0.05, 0.1), ...) {
     mask = raster('data/seamask.nc')
     mask = raster::resample(mask, x)
     x[mask != 2] = NaN
@@ -13,7 +13,7 @@ plotStandardMap <- function(x, txt = '', limits, cols, e = NULL, recrop_e = TRUE
         plot_raster_from_raster(x, y_range = y_range, limits = limits, cols = cols,
                                 transpose = FALSE, srt = 0, add_legend = FALSE,
                                 quick = TRUE, e = e, interior = FALSE, ePatternRes = 15,
-                                ePatternThick = 0.67,...)
+                                ePatternThick = 0.67, limits_error = limits_error, ...)
     }
     
     FUN(...)
@@ -73,7 +73,7 @@ StandardLegend <- function(cols, limits, dat, extend_max = TRUE, oneSideLabels =
                            plot_loc = NULL, srt = 0, add = FALSE, ...) { 
         
         if (is.null(plot_loc)) {
-            if (add) plot_loc = c(0.35, 0.95, 0.04, 0.08)
+            if (add) plot_loc = c(0.32, 0.87, 0.025, 0.07)
             else plot_loc = c(0.01, 0.95, 0.3, 0.56)
         }
         add_raster_legend2(cols, limits, dat = dat, add = add,
