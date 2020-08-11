@@ -211,3 +211,5 @@ writeRaster(RealmOnly, file = "outputs/realms.nc", overwrite=TRUE)
 
 biomesR = convert_regular_2_pacific_centric(biomesR)
 writeRaster(biomesR  , file = "outputs/full_biome_realms_pacific_centric.nc", overwrite=TRUE)
+
+write.csv(tabi, "outputs/regions_table.csv")
