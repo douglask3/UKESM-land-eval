@@ -26,14 +26,17 @@ obs_clim_files = list("MAP" = "../LimFIRE/outputs/Prc2000-2014.nc",
 
 cols = list("MAP" = c('#ffffd9','#edf8b1','#c7e9b4','#7fcdbb','#41b6c4',
                       '#1d91c0','#225ea8','#253494','#081d58'), 
-            "MAT" = c('#a50026','#d73027','#f46d43','#fdae61','#fee090',
-                      '#abd9e9','#74add1','#4575b4','#313695'))
+            "MAT" = rev(c('#a50026','#d73027','#f46d43','#fdae61','#fee090',
+                      '#abd9e9','#74add1','#4575b4','#313695')))
 
-limits = list("MAP" = c(0, 10, 50, 100, 500, 1000, 2000, 3000, 4000),       
-              "MAT" = c(-20, -15, -10, -5, 0, 5, 10, 15, 20))
+limits = list("MAP" = c(0, 10, 50, 100, 500, 1000, 1500, 2000, 3000),       
+              "MAT" = c(-15, -10, -5, 0, 5, 10, 15, 20, 25, 30))
 
 mod_scale = c("MAP" = 60*60*24*365.25, "MAT" = 1)
 obs_scale = c("MAP" = 12, "MAT" = 1)
+
+mod_shift = c("MAP" = 0, "MAT" = -273.15)
+obs_shift = c("MAP" = 0, "MAT" = 0)
 
 #browser()
 
@@ -41,8 +44,6 @@ mtextLabs <- function(let, lab, var)
     mtext(paste0(let, ') ', lab, ' ', var), adj = 0.1, line = -1)
 
 plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) {
-    #aa = stack(file[[1]]) * scale
-    #plotAA(aa, cols = cols, limits = limits, ...)
     if (length(file) == 1) {
         clims = list(brick(make_obs_climateology(file)))
         dat = brick(make_obs_phaseConc(file))
@@ -53,6 +54,7 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
         conc = stack(file[['Concentration']])
         phase = stack(file[[2]])
     }
+    
     modals = layer.apply(clims, Modalise)  
     mask = raster('data/seamask.nc')
     mask = raster::resample(mask, modals[[1]]) == 0
@@ -73,8 +75,7 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
     if (nlayers(phase) > 1) {
         phase_mean = PolarConcentrationAndPhase(climAll, phase_units = 'months',
                                                 justPhase = TRUE)
-        phase_mode0 = round(phase)
-     
+        phase_mode0 = round(phase)     
         phase_mode = getmode.raster(phase_mode0)
         phase_e = 1 - mean(phase_mode == phase_mode0)
     } else {
@@ -154,3 +155,30 @@ plotStuff <- function(name, files, scales, ...) {
 
 plotStuff("UKESM", sim_clim_files, mod_scale)
 plotStuff("CRUTS4.01", obs_clim_files, obs_scale)
+
+plotAAVar <- function(var, let, ...) {
+    sim = stack(sim_clim_files[[var]][[1]]) 
+    sim = layer.apply(sim, '*', mod_scale[var])
+    sim = layer.apply(sim, '+', mod_shift[var])
+    obs = mean(brick(obs_clim_files[[var]])) * obs_scale[var] + obs_shift[var]
+    
+    cols = cols[[var]]
+    limits = limits[[var]]
+    e = sd.raster(sim + mod_shift[var])
+    mask = raster('data/seamask.nc')
+    mask = raster::resample(mask, e) == 0
+    e[mask] = NaN
+    limits_error = quantile(e, c(0.1, 0.5), na.rm = TRUE)
+    plotStandardMap(sim, e = e, limits = limits, cols = cols, limits_error = limits_error)
+    mtextLabs(let[1], 'UKESM', var)     
+    plotStandardMap(obs, limits = limits, cols = cols)
+    mtextLabs(let[2], 'CRUTS4.01', var)
+    StandardLegend(obs[[1]], limits = limits, cols = cols,
+                   add = TRUE, oneSideLabels = FALSE, ...)
+}
+max.rater <- function(...) max.raster(...)
+png('figs/annual_average_clims.png', res = 300, units = 'in', width = 7.2, height = 3.7)
+    par(mfcol = c(2,2), mar = rep(0, 4))
+    plotAAVar('MAP', letters[c(1,3)], units = 'mm/yr')
+    plotAAVar('MAT', letters[c(2,4)], units = '~DEG~C'   , extend_min = TRUE)
+dev.off.gitWatermark()
