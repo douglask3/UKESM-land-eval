@@ -62,8 +62,8 @@ plotFUN <- function() {
                 axis(2, labels = FALSE)
                 if (axis2) axis(2)
                 if (var == tail(vegType,1 )) axis(1)
-                if (addName)
-                    mtext(side = 3, adj = 0.9, name, col = "white", line = -1)
+                #if (addName)
+                    #mtext(side = 3, adj = 0.9, name, col = "white", line = -1)
             }
         }
         scatterLayer <- function(xs, ys, zs, ns = 1) {
@@ -161,14 +161,8 @@ plotFUN <- function() {
                   xaxt = 'n', yaxt = 'n',  add = TRUE)
         }        
     }
-    r_eg = raster(sim_clim_files[1])
-    openObsClim <- function(file) {
-        r = brick(file)
-        if (nlayers(r) == 1) r = r[[1]] else r = mean(r)
-        r = raster::resample(r, r_eg)
-        return(r)
-    }
-    if (!is.null(obs_clim_files)) obs_clim = lapply(obs_clim_files, openObsClim)
+    r_eg = raster(sim_clim_files[1])    
+    if (!is.null(obs_clim_files)) obs_clim = lapply(obs_clim_files, openObsClim, r_eg)
     if (length(obs_clim) == 3)
         obs_clim = c(obs_clim[[2]] - obs_clim[[1]], obs_clim[[3]])
     if (xphase) height = 12.5 else height = 10
@@ -176,8 +170,11 @@ plotFUN <- function() {
         par(mfrow = c(length(vegType) + 1, 3), mar = rep(0.5, 4), oma = c(4, 4, 0, 0))
         mapply(plotVar, vegType, names(vegType))
         if (!xphase) {
-            mtext.units(side = 1 , line = -10, xlab, outer = TRUE)
-            mtext.units(side = 2 , line = 2.5, ylab, outer = TRUE)
+            mtext.units(side = 1, line = -10, xlab, outer = TRUE)
+            mtext.units(side = 2, line = 2.5, ylab, outer = TRUE)
+            mtext.units(side = 3, line = 2.5, adj = 1/6, outer = TRUE, "Observations") 
+            mtext.units(side = 3, line = 2.5, adj = 1/2, outer = TRUE, "UKESM")
+            mtext.units(side = 3, line = 2.5, adj = 5/6, outer = TRUE, "UKESM - Obs")
         }
         plot.new()
         add_raster_legend2(transpose = FALSE, col = cols0, limits = lims, maxLab = 100,
@@ -201,8 +198,8 @@ yshift = 273.15
 
 fname = "figs/veg_MAT_MAP.png"
 
-#plotFUN()
-
+plotFUN()
+browser()
 
 sim_clim_files = c("MAP_phase" = listFiles("outputs/clim/precip/", "phase-2001_2013"),
                    "MAT_phase" = listFiles("outputs/clim/tas/"   , "phase-2001_2013"),
@@ -223,7 +220,7 @@ make_obs_phaseConc <- function(file, justPhase = FALSE) {
 }
 obs_clim_files[1:2] = sapply(obs_clim_files[1:2], make_obs_phase, TRUE)
 
-xlim = c(-3000, 3000); ylim = c(-30, 40)
+xlim = c(-3000, 3000); ylim = c(-28, 33)
 xlab = 'MAP (mm ~yr-1~)'; ylab = 'MAT (~DEG~C)'
 yscale = 60*60*24*360; xscale = 1
 xshift = 0; yshift = 0
