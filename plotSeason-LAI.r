@@ -26,6 +26,10 @@ sim_files = list.files("outputs/LAI/", pattern  = "u-", full.names = TRUE)
 files = list("Observation" = 'outputs/lai_0.5x0.5_2000-2005-LAI.nc',
              "Simulation"  = sim_files[grepl("control", sim_files)])
           
+sim_files = list.files("outputs/GPP/", pattern  = "u-", full.names = TRUE)
+files = list("Observation" = 'outputs/GPP/Observation-controlgpp_0.5x0.5.nc',
+             "Simulation"  = sim_files[grepl("control", sim_files)])
+          
 axisMonth = c(2, 6, 4, 8)
 greens9   = c("#FBFFFE", "#F7FFFB", "#EAFDEF",  "#DEF7EB", "#C6EFDB", "#9EE1CA", "#6BD6AE", 
             "#42C692", "#21B571", "#089C51", "#086B30", "#043617", "#001108")
@@ -38,6 +42,7 @@ run <- function(name) {
     dlapply <- function(r,  ...) lapply(r, lapply, ...)
     dsapply <- function(r,  ...) sapply(r, sapply, ...)
     obs = dlapply(files,  brick)
+    obs[[1]][[1]]= obs[[1]][[1]]*60*60*24*1000
     mxLayers = min(unlist(dsapply(obs, nlayers)))
     obs = obs_ia = dlapply(obs, function(i) i[[1:mxLayers]])
     
@@ -95,7 +100,7 @@ run <- function(name) {
         }
         addAxis(c(0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 2, 5, 100), 1)
         addAxis(c(0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 2, 5, 100), 2)
-        abline(lm(y~x))
+        #abline(lm(y~x))
         mtext.units(side = 3, paste0("~R2~: ",  round(cor(x, y)^2, 2)), line = -2.8, adj = 0.1)
         mtext.units(side = 3, "p < 0.001", line = -4, adj = 0.1)
         
