@@ -7,7 +7,7 @@ graphics.off()
 obs_files = c(IGBP = "igbp", CCI = "cci", VCF = "VCF")
 
 vars = c(Tree = "tree", Wood = "wood", Shrub = "shrub", Herb = "herb", Grass = "grass",
-         "Bare Soil" = "bares")
+         "Total\nveg. cover" = "bares")
 
 limits = seq(0, 0.9, 0.1)*100
 cols = c('#ffffe5','#f7fcb9','#d9f0a3','#addd8e','#78c679','#41ab5d','#238443','#006837','#004529')
@@ -106,7 +106,7 @@ plotVariable <- function(var, vname) {
         addText <- function() {
             if (var == vars[[1]]) mtext(nmtext, side = 3)
             if (nm == obs_files[1]) {
-                mtext(vname, side = 2)
+                mtext(vname, side = 2, padj = 0.5)
                 #if (var == vars[length(vars)])
                     
             }
@@ -182,10 +182,11 @@ plotVariable <- function(var, vname) {
         index = 1:ncol(nulls)
         
         nbeats = apply(cbind(nulls, tab_ben), 1,
-                       function(i) sum(sapply(i[-index], '<', i[index])))
+                       function(i) sapply(i[-index], function(j) sum(j< i[index])))
+        
         return(nbeats)    
     }
-    bench = mapply(benchmarkObs, obss, names(obss))
+    bench = mapply(benchmarkObs, obss, names(obss), SIMPLIFY = FALSE)
     #name = paste0("docs/", var, "-MM-full.csv")
     #tab = round(tab, 3)
     #write.csv(tab, file = fname)
@@ -196,16 +197,17 @@ plotVariable <- function(var, vname) {
     #fname = paste0("docs/", var, "-MM-summ.csv")
     #tabi = round(tabi, 3)
     #write.csv(tabi, file = fname)
+   
     return(list(obss, sims, bench))
 }
 
-png("figs/vegDist.png", height = 3 * 183/4, width = 183, units = 'mm', res = 450)
-    layout(rbind(t(matrix(1:24, nrow = 4)), 25), heights = c(1, 1, 1, 1, 1, 1, 0.3))
-    par( mar = rep(0,4), oma = rep(1.5, 4))
-    out = mapply(plotVariable, vars, names(vars))
-    StandardLegend(cols, limits, out[[1]][[1]][[1]], extend_max = FALSE,
-                   maxLab = 100, add = FALSE)
-dev.off()
+#png("figs/vegDist.png", height = 3 * 183/4, width = 183, units = 'mm', res = 450)
+#    layout(rbind(t(matrix(1:24, nrow = 4)), 25), heights = c(1, 1, 1, 1, 1, 1, 0.3))
+#    par( mar = rep(0,4), oma = rep(1.5, 4))
+#    out = mapply(plotVariable, vars, names(vars))
+#    StandardLegend(cols, limits, out[[1]][[1]][[1]], extend_max = FALSE,
+#                   maxLab = 100, add = FALSE)
+#dev.off()
 
 scores = out[3,]
 
@@ -214,26 +216,56 @@ plot(c(-2, length(scores) + 0.5), c(-3, 29.5), axes = FALSE, xaxt = 'n', yaxt = 
 text(y = 0, x = 1:6,  names(vars))
 text(y = 1:29, x = 0, adj = 1, xpd = TRUE, c("Global", region_names), srt = 0)
 
-bcols = make_col_vector(c('#a50026', '#fee090', '#313695'), ncol = 13)
+#bcols = make_col_vector(c('#a50026', '#fee090', '#313695'), ncol = 13)
+bcols = c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
 addScoreCols <- function(score, x_main) {
-    addCol <- function(rn) {
-        cs = score[rn,]
-        if (length(cs) == 2) {
-            xs = list(c(-0.5, 0.5, -0.5), c(-0.5, 0.5, 0.5))
-            ys = list(c(-0.5, 0.5, 0.5), c(-0.5, 0.5, -0.5))
-        } else {
-            xs = list(c(0, -0.5, -0.5, 0), c(0, 0.5, 0.5, 0), c(0, -0.5, 0.5))
-            ys = list(c(0, -0.5, 0.5, 0.5), c(0, -0.5, 0.5, 0.5), c(0, -0.5, -0.5))
-        }
-        addPoly <- function(xs, ys, col) 
-            polygon(x_main + xs, rn + ys, col = col)
-        mapply(addPoly, xs, ys, bcols[cs+1])
-    }
     
-    lapply(1:nrow(score), addCol)
+    nsegs1 = length(score)
+    rs = seq(0, 2*pi, length.out = nsegs1 + 1)
+    addRegion <- function(rn) {
+        addCol <- function(on) {        
+            cs = score[[on]][,rn]
+            nsegs2 = length(cs)
+            x = seq(rs[on], rs[on+1], length.out = nsegs2+1)
+            getCord <- function(FUN) {
+                y =  FUN(x)/2 #sqrt(2) *
+                y[y>  0.5 ] =  0.5
+                y[y<(-0.5)] = -0.5
+                y = mapply(c, 0, y[-1], head(y, -1), SIMPLIFY = FALSE)
+                return(y)
+            }
+            xs = getCord(sin); ys = getCord(cos)
+           
+        
+            addPoly <- function(xs, ys, col, ...) 
+                polygon(x_main + xs, rn + ys, col = col, ...)
+            
+            
+            mapply(addPoly, xs, ys, bcols[cs+1], border = NA)
+            
+            #if (length(nsegs1) == 3) {
+            #    xs = list(c(-0.5, 0.5, -0.5), c(-0.5, 0.5, 0.5))
+            #    ys = list(c(-0.5, 0.5, 0.5), c(-0.5, 0.5, -0.5))
+            #} else {
+            #    xs = list(c(0, -0.5, -0.5, 0), c(0, 0.5, 0.5, 0), c(0, -0.5, 0.5))
+            #    ys = list(c(0, -0.5, 0.5, 0.5), c(0, -0.5, 0.5, 0.5), c(0, -0.5, -0.5))
+            #}
+            
+            addPoly(c(0, sapply(xs, function(i) i[3:2]), 0),
+                    c(0, sapply(ys, function(i) i[3:2]), 0), 'transparent' , border = 'black')
+            #addPoly(xs[[1]], ys[[1]], 'transparent' , border = 'black')
+            
+        }
+    
+        lapply(1:length(score), addCol)
+        
+    }
+    lapply(1:ncol(score[[1]]), addRegion)
 }
 mapply(addScoreCols, scores, 1:length(scores))
+
 dev.off()
+save(scores, file = 'outputs/bench/cover.Rd')
 browser()
 itemComparison <- function(obs_name) {
     if(any(names(out[[2]][[1]])==obs_name)) index = c(1, 3, 5, 6) else index = c(1, 4, 6)
@@ -257,7 +289,7 @@ itemComparison <- function(obs_name) {
                       'median', 'mean', 'randomly-resampled mean', 'randomly-resampled sd')
     
     tab = round(scores, 3)
-
+    browser()
     tabFull = tab[,c(1:(ncol(tab)-6), (ncol(tab)-3):ncol(tab))]
     write.csv(tabFull, file = paste0("docs/items-", obs_name, "-MM-full.csv"))
 
