@@ -1,4 +1,6 @@
 source("cfg.r")
+
+sourceAllLibs("../benchmarkmetrics_github/benchmarkMetrics/R/")
 graphics.off()
 
 listFiles <- function(path, pattern) 
@@ -43,7 +45,7 @@ obs_shift = c("MAP" = 0, "MAT" = 0)
 mtextLabs <- function(let, lab, var)
     mtext(paste0(let, ') ', lab, ' ', var), adj = 0.1, line = -1)
 
-plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) {
+plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs,...) {
     if (length(file) == 1) {
         clims = list(brick(make_obs_climateology(file)))
         dat = brick(make_obs_phaseConc(file))
@@ -51,7 +53,7 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
         conc = dat[[2]]
     } else {
         clims = lapply(file[["Clim"]], brick)
-        conc = stack(file[['Concentration']])
+        conc = stack(file[['Concentration']][9:16])
         phase = stack(file[[2]])
     }
     
@@ -85,7 +87,8 @@ plotClimVar <- function(file, cols, limits, scale, addLegend, names, labs, ...) 
     plotStandardMap(phase_mean, limits = phase_lims, cols = phase_cols, e = phase_e, limits_error = c(0.1, 0.2))
     mtextLabs(labs[3], names, ' phase')
     if (addLegend) SeasonLegend(phase_lims, cols = phase_cols, add = FALSE, mar = rep(0, 4))
-    return(phase) 
+    
+    return(list(phase, conc, modals)) 
 }
 
 getmode <- function(v) {
@@ -124,6 +127,7 @@ calPhaseDiff <- function(rs) {
     r[r>6] = r[r>6] -12
     r
 }
+if (F) {
 plotStuff <- function(name, files, scales, ...) {
     fname = paste0("figs/climStuff-", name, ".png")
         png(fname, width = 7.2, height = 6.8, res = 300, units = 'in')
@@ -131,9 +135,10 @@ plotStuff <- function(name, files, scales, ...) {
                     c(1, 2, 3, 3, 8, 8), c(5, 6, 7, 7, 0, 0)),
                heights = c(1, 1, 0.6, 0.4, 0.6, 0.4), width = c(0.45, 0.45, 0.1, 1))
         par(mar = rep(0, 4), oma = c(0, 0, 0.5, 0))
-        phase = mapply(plotClimVar,files, cols, limits, scales,
+        out = mapply(plotClimVar,files, cols, limits, scales,
                        addLegend = c(T, F), names = c('Precip', 'Temp'),
                        labs = list(letters[c(1, 3, 5)], letters[c(2, 4, 6)]), ...)
+        phase = out[1,]
         dphase = layer.apply(1:nlayers(phase[[1]]), function(i)
                             calPhaseDiff(c(phase[[1]][[i]], phase[[2]][[i]])))
         if (nlayers(dphase) > 1) {
@@ -151,10 +156,11 @@ plotStuff <- function(name, files, scales, ...) {
         mtextLabs(letters[7], 'Phase', ' difference')
         SeasonLegend(c(0.5:5.5,-5.5:-0.5), cols = dphase_cols, add = FALSE, mar = rep(0, 4))
     dev.off.gitWatermark(comment = 'DRAFT')
+    return(out)
 }
 
-plotStuff("UKESM", sim_clim_files, mod_scale)
-plotStuff("CRUTS4.01", obs_clim_files, obs_scale)
+season_sim = plotStuff("UKESM", sim_clim_files, mod_scale)
+season_obs = plotStuff("CRUTS4.01", obs_clim_files, obs_scale)
 
 plotAAVar <- function(var, let, ...) {
     sim = stack(sim_clim_files[[var]][[1]]) 
@@ -175,10 +181,63 @@ plotAAVar <- function(var, let, ...) {
     mtextLabs(let[2], 'CRUTS4.01', var)
     StandardLegend(obs[[1]], limits = limits, cols = cols,
                    add = TRUE, oneSideLabels = FALSE, ...)
+    
+    return(c(obs, sim))
 }
 max.rater <- function(...) max.raster(...)
 png('figs/annual_average_clims.png', res = 300, units = 'in', width = 7.2, height = 3.7)
     par(mfcol = c(2,2), mar = rep(0, 4))
-    plotAAVar('MAP', letters[c(1,3)], units = 'mm/yr')
-    plotAAVar('MAT', letters[c(2,4)], units = '~DEG~C'   , extend_min = TRUE)
+    pr_aa  = plotAAVar('MAP', letters[c(1,3)], units = 'mm/yr')
+    tas_aa = plotAAVar('MAT', letters[c(2,4)], units = '~DEG~C'   , extend_min = TRUE)
 dev.off.gitWatermark()
+}
+metric_comps <- function(sims, obs, FUN = NME, nullFUN = null.NME) {   
+    obs = raster::resample(obs, sims[[1]])    
+    obs[is.na(regions)] = NaN
+    sims[is.na(regions)] = NaN
+    forRegion <- function(r) {
+        if (!is.na(r)) {
+            obs[regions != r] = NaN
+            sims[regions != r] = NaN
+        }     
+        aa_comp <- function(sim) {
+            sc = score(FUN(obs, sim,w = raster::area(obs)))
+            sapply(sc, function(i) sum(i< nulls))
+        }
+        
+        nulls0 = summary(nullFUN(obs, n = 10)) 
+        nulls = nulls0[1:4]
+        nulls[3] = nulls0[3] - nulls0[4]
+        nulls[4] = nulls0[3] + nulls0[4]
+        scores = layer.apply(sims, aa_comp)
+        return(scores)
+    }
+    out = sapply(c(NaN, 1:max.raster(regions, na.rm = TRUE)), forRegion)
+    rownames(out) = jobs
+    colsnames(out) = c("Global", region_names)
+}
+
+PhaseMet <- function(obs, sim, w) 
+    out = MPDonly(obs, sim, w)
+
+
+ModalMet <- function(...) NME(...)
+
+nullPhase <- function(obs, n) 
+    null.FUN.default(obs, MPDonly, n = n, step1only=FALSE, w = raster::area(obs))
+
+
+nullModal <- function(...) 
+    null.NME(...)
+
+
+pr_season_comp = mapply(metric_comps, season_sim, season_obs,
+                        c(PhaseMet, NME, ModalMet),
+                        c(nullPhase, null.NME, nullModal), SIMPLIFY = FALSE)
+
+pr_aa_NME  = metric_comps( pr_aa[[2]],  pr_aa[[1]])
+tas_aa_NME = metric_comps(tas_aa[[2]], tas_aa[[1]])
+
+save(pr_aa_NME, tas_aa_NME, pr_season_comp, file = "outputs/bench/tas_pr.Rd")
+
+       
