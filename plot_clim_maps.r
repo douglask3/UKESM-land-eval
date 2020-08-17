@@ -127,7 +127,7 @@ calPhaseDiff <- function(rs) {
     r[r>6] = r[r>6] -12
     r
 }
-if (F) {
+if (T) {
 plotStuff <- function(name, files, scales, ...) {
     fname = paste0("figs/climStuff-", name, ".png")
         png(fname, width = 7.2, height = 6.8, res = 300, units = 'in')
@@ -214,7 +214,8 @@ metric_comps <- function(sims, obs, FUN = NME, nullFUN = null.NME) {
     }
     out = sapply(c(NaN, 1:max.raster(regions, na.rm = TRUE)), forRegion)
     rownames(out) = jobs
-    colsnames(out) = c("Global", region_names)
+    colnames(out) = c("Global", region_names)
+    return(out)
 }
 
 PhaseMet <- function(obs, sim, w) 
