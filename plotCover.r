@@ -201,71 +201,18 @@ plotVariable <- function(var, vname) {
     return(list(obss, sims, bench))
 }
 
-#png("figs/vegDist.png", height = 3 * 183/4, width = 183, units = 'mm', res = 450)
-#    layout(rbind(t(matrix(1:24, nrow = 4)), 25), heights = c(1, 1, 1, 1, 1, 1, 0.3))
-#    par( mar = rep(0,4), oma = rep(1.5, 4))
-#    out = mapply(plotVariable, vars, names(vars))
-#    StandardLegend(cols, limits, out[[1]][[1]][[1]], extend_max = FALSE,
-#                   maxLab = 100, add = FALSE)
-#dev.off()
+png("figs/vegDist.png", height = 3 * 183/4, width = 183, units = 'mm', res = 450)
+    layout(rbind(t(matrix(1:24, nrow = 4)), 25), heights = c(1, 1, 1, 1, 1, 1, 0.3))
+    par( mar = rep(0,4), oma = rep(1.5, 4))
+    out = mapply(plotVariable, vars, names(vars))
+    StandardLegend(cols, limits, out[[1]][[1]][[1]], extend_max = FALSE,
+                   maxLab = 100, add = FALSE)
+dev.off()
 
 scores = out[3,]
 
-png("figs/MMscoreCols.png", height = 15, width = 5, units = 'in', res = 300)
-plot(c(-2, length(scores) + 0.5), c(-3, 29.5), axes = FALSE, xaxt = 'n', yaxt = 'n', xlab = '', ylab = '')
-text(y = 0, x = 1:6,  names(vars))
-text(y = 1:29, x = 0, adj = 1, xpd = TRUE, c("Global", region_names), srt = 0)
 
-#bcols = make_col_vector(c('#a50026', '#fee090', '#313695'), ncol = 13)
-bcols = c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
-addScoreCols <- function(score, x_main) {
-    
-    nsegs1 = length(score)
-    rs = seq(0, 2*pi, length.out = nsegs1 + 1)
-    addRegion <- function(rn) {
-        addCol <- function(on) {        
-            cs = score[[on]][,rn]
-            nsegs2 = length(cs)
-            x = seq(rs[on], rs[on+1], length.out = nsegs2+1)
-            getCord <- function(FUN) {
-                y =  FUN(x)/2 #sqrt(2) *
-                y[y>  0.5 ] =  0.5
-                y[y<(-0.5)] = -0.5
-                y = mapply(c, 0, y[-1], head(y, -1), SIMPLIFY = FALSE)
-                return(y)
-            }
-            xs = getCord(sin); ys = getCord(cos)
-           
-        
-            addPoly <- function(xs, ys, col, ...) 
-                polygon(x_main + xs, rn + ys, col = col, ...)
-            
-            
-            mapply(addPoly, xs, ys, bcols[cs+1], border = NA)
-            
-            #if (length(nsegs1) == 3) {
-            #    xs = list(c(-0.5, 0.5, -0.5), c(-0.5, 0.5, 0.5))
-            #    ys = list(c(-0.5, 0.5, 0.5), c(-0.5, 0.5, -0.5))
-            #} else {
-            #    xs = list(c(0, -0.5, -0.5, 0), c(0, 0.5, 0.5, 0), c(0, -0.5, 0.5))
-            #    ys = list(c(0, -0.5, 0.5, 0.5), c(0, -0.5, 0.5, 0.5), c(0, -0.5, -0.5))
-            #}
-            
-            addPoly(c(0, sapply(xs, function(i) i[3:2]), 0),
-                    c(0, sapply(ys, function(i) i[3:2]), 0), 'transparent' , border = 'black')
-            #addPoly(xs[[1]], ys[[1]], 'transparent' , border = 'black')
-            
-        }
-    
-        lapply(1:length(score), addCol)
-        
-    }
-    lapply(1:ncol(score[[1]]), addRegion)
-}
-mapply(addScoreCols, scores, 1:length(scores))
-
-dev.off()
-save(scores, file = 'outputs/bench/cover.Rd')
+save(scores, vars, file = 'outputs/bench/cover.Rd')
 browser()
 itemComparison <- function(obs_name) {
     if(any(names(out[[2]][[1]])==obs_name)) index = c(1, 3, 5, 6) else index = c(1, 4, 6)
