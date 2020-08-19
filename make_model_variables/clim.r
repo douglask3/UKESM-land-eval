@@ -11,14 +11,7 @@ out_dir = 'outputs/clim/'
 makeDir(out_dir)
 run <- function(name, id, obs_file, job) {
     run4years <- function(year) {
-        run4file <- function(file, type = 'sim') {
-            
-            dat = brick(file)
-            dat = getYrsFromLayers(dat, year, NULL)
-            clim = convert2Climatology(dat)   
-            pc = PolarConcentrationAndPhase(clim, phase_units = "months")
-            dat = getYrsFromLayers(dat, year)
-            MAD = mean(dat)
+        run4file <- function(file, type = 'sim', mask = NULL) {  
 
             fname_out = paste0(out_dir, '/', name , '/')
             makeDir(fname_out)
@@ -31,21 +24,37 @@ run <- function(name, id, obs_file, job) {
             
             fname_out = paste0(fname_out, start, '-', c('mean_annual', 'climatology',
                                'phase', 'concentration', 'annual'), '.nc')
+            if (all(file.exists(fname_out))) return(brick(fname_out[5]))
+            print(file)
+            dat = brick(file)
+            dat = getYrsFromLayers(dat, year, NULL)
             
-            writeRaster.Standard(MAD    , fname_out[1])
-            writeRaster.Standard(clim   , fname_out[2])
-            writeRaster.Standard(pc[[1]], fname_out[3])
-            writeRaster.Standard(pc[[2]], fname_out[4])
-            writeRaster.Standard(dat    , fname_out[5])
+            if (is.null(dat)) return(NULL)
+            clim = convert2Climatology(dat)   
+            pc = PolarConcentrationAndPhase(clim, phase_units = "months")
+            dat = getYrsFromLayers(dat, year)
+            MAD = mean(dat)
+        
+            writeRaster.Standard.mask <- function(r, ...) {
+                if (!is.null(mask))  r = raster::resample(r, mask)
+                writeRaster.Standard(r, ...)
+            }
+
+            writeRaster.Standard.mask(MAD    , fname_out[1])
+            writeRaster.Standard.mask(clim   , fname_out[2])
+            writeRaster.Standard.mask(pc[[1]], fname_out[3])
+            writeRaster.Standard.mask(pc[[2]], fname_out[4])
+            writeRaster.Standard.mask(dat    , fname_out[5])
+            return(dat)
         }
+        
         file = mod_files[grepl(id, mod_files) & grepl(job, mod_files)]
-        run4file(file)
+        dat = run4file(file) 
         if (job == jobs[1]) {
             obs_file = list.files(obs_file, full.name = TRUE)            
-            if (length(obs_file) > 0) lapply(obs_file, run4file, type = 'Observation')
-        }       
-        
-       
+            if (length(obs_file) > 0) lapply(obs_file, run4file, type = 'Observation', mask = dat)
+        }   
+        print(job)   
     }
     lapply(years, run4years)
 }

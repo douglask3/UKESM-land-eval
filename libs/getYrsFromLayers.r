@@ -5,7 +5,10 @@ getYrsFromLayers <- function(dat, years = NULL, FUN = mean) {
     if (is.null(years)) return(yrs)
     index = apply(sapply(years, '==', yrs), 2, which)
     if (class(index) == "matrix") index = matrix2list.col(index)
-
+    if (!all(sapply(index, function(i) length(i) >= 12))) {
+        
+        return(NULL)
+    }
     dat = convert_pacific_centric_2_regular(dat)
     if (is.null(FUN)) {
         index = unlist(index)
