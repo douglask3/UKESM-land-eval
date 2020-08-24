@@ -19,20 +19,26 @@ run <- function(name, id, obs_file, job) {
             makeDir(fname_out)
             print(type)
             if (type == 'sim') start = job
-                else start = paste0(type, '_', filename.noPath(file, noExtension = TRUE))
-
-            
+                else {
+                    start = paste0(type, '_', filename.noPath(file, noExtension = TRUE))
+            }
             fname_out = paste0(fname_out, start, '-', c('mean_annual', 'climatology',
                                'phase', 'concentration', 'annual'), '.nc')
             if (all(file.exists(fname_out))) return(brick(fname_out[5]))
             print(file)
             dat = brick(file)
             dat = getYrsFromLayers(dat, year, NULL)
+            if (grepl('CMAP', start)) dat = dat  *60*60*24*365.25
             
             if (is.null(dat)) return(NULL)
-            clim = convert2Climatology(dat)   
-            pc = PolarConcentrationAndPhase(clim, phase_units = "months")
+            clim = convert2Climatology(dat)
+            
             dat = getYrsFromLayers(dat, year)
+            if (grepl('tas', file) &&   min.raster(clim, na.rm = TRUE) < (-1)) {        
+                clim = clim + 273.15
+                dat = dat + 273.15
+            }
+            pc = PolarConcentrationAndPhase(clim, phase_units = "months")
             MAD = mean(dat)
         
             writeRaster.Standard.mask <- function(r, ...) {
