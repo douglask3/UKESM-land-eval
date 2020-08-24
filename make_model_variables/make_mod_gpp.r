@@ -16,7 +16,7 @@ obs_file_out = dat_fnames
 run <- function(name, files, job, dat_file) {
     obs = try(brick(dat_file))
     if (class(obs) == "try-error") {
-        browser()
+        return(invisible())
     }
     openDat <- function(file, years) {
         dat = brick(file)
@@ -71,7 +71,7 @@ run <- function(name, files, job, dat_file) {
 
     obs[obs > 9E9] = NaN
     obs = raster::resample(obs, dati[[1]])
-    
+     
     names(obs) = names(dati)
     
     print("outputting")
