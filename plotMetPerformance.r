@@ -13,8 +13,8 @@ vars = names(vars)
 cols = c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
 load('outputs/bench/tas_pr.Rd')
 
-scores = c(scores, list(list( pr_aa_NME)), lapply(pr_season_comp[1:3], list),
-                   list(list(tas_aa_NME)), lapply(pr_season_comp[4:6], list))
+scores = c(scores, list( pr_aa_NME), pr_season_comp[1:3],
+                   list(tas_aa_NME), pr_season_comp[4:6])
 bcolss = c(bcolss, rep(list(cols), 8))
 varSeason = c('Average', 'Phase', 'Conc.', 'Modality')
 vars = c(vars, paste0('MAP\n',varSeason)  , paste0('MAT\n',varSeason))
@@ -65,10 +65,12 @@ addScoreCols <- function(score, x_main, bcols) {
                 else mapply(Addpie, 1:3, 0.5, c(0.0, -0.25, 0.25), c(0.25, -0.25, -0.25))
             }
         }
-        lapply(1:length(score), addCol)
-        
+        lapply(1:length(score), addCol)        
     }
-    lapply(1:ncol(score[[1]]), addRegion)
+    
+    ni = ncol(score[[1]])
+    if (is.null(ni)) ni = length(score[[1]])
+    lapply(1:ni, addRegion)
 }
 mapply(addScoreCols, scores, 1:length(scores), bcolss)
 
