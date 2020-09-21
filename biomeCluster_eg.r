@@ -1,11 +1,12 @@
 library(raster)
 graphics.off()
 library(rasterPlot)
+source("../rasterextrafuns/rasterPlotFunctions/R/mtext.units.r")
 
 dir = "outputs/veg_frac/"
 
-obs  = c("cci", "igbp")
-vars = c("herb", "trees") 
+obs  = c("VCF", "cci", "igbp")
+vars = c("trees", "herb", "bare") 
 
 realmNames = c("Global", "Australia", "Southern\nAfrica", "Northern\nAfrica", "SE\nAsia",
                "Southern\nAmerica", "Temperate\nAmerica", "Boreal\nAmerica",
@@ -20,21 +21,31 @@ files = list.files(dir, full.names=TRUE)
 forDataset <- function(id) {
     files = files[grepl(id, files)]
     
-    herb = files[grepl(vars[1], files)]
-    tree = files[grepl(vars[2], files)]
+    tree = files[grepl(vars[1], files)]
+    herb = files[grepl(vars[2], files)]
+    bare = files[grepl(vars[3], files)]
     
-    herb = raster(herb)
     tree = raster(tree)   
+    herb = raster(herb)  
+    bare = raster(bare)
     
-    mask = !is.na(herb + tree + rmask)
+    if (grepl("VCF", files[1])) bare = 1-tree-herb
+    tot = tree + herb + bare
+    
+    tree = tree/tot
+    herb = herb/tot
+    bare = bare/tot
+     
+    mask = !is.na(tot + rmask)
     forRegion <- function(rid, name) {    
         if (!is.na(rid)) mask = mask & (rmask == rid)
         hs = herb[mask]
         ts = tree[mask]
         bs = 1 - ts - hs
-
+        
         x = bs + 0.5 * ts
         y = ts
+        #dev.new()
         if (length(x) == 0) {
             plot(0, 0, pch = 20, cex = 2, col = cols, axes = FALSE, type = 'n',
             xlab = '', ylab = '', xlim = c(0, 1), ylim = c(0,1))
@@ -44,6 +55,34 @@ forDataset <- function(id) {
             plot(y~x, pch = 20, cex = 2, col = cols, axes = FALSE,
                 xlab = '', ylab = '', xlim = c(0, 1), ylim = c(0,1))
         }
+        #browser()
+        A = (ts/bs)
+        A[is.na(A)] = 1
+        A[A>1] = 1/A[A>1]
+        A = A+1
+
+        logit <- function(x) {
+            x[x<0.000001] = 0.000001
+            x[x>0.999999] = 0.999999
+            log(x/(1-x))
+        }
+        xf = logit(bs *A); yf = logit(ts*A)
+        xf = xf[!(ts == 0 & bs == 1)]; yf = yf[!(ts == 0 & bs == 1)]
+        fit = lm(yf~xf)
+        xnew = seq(0, 1, 0.001)
+        xnewt = logit(xnew)
+        ynewt = predict(fit, newdata = data.frame(xf = xnewt))
+        ynew = 1/(1+exp(-ynewt))
+        print(name)
+        #if ("Boreal\nEurasia" == name) browser()
+        A = (ynew/xnew)
+        A[A>1] = 1/A[A>1]
+        A = A+1
+        xnew = xnew /A; ynew = ynew/A
+        
+        lines(xnew+0.5*ynew, ynew, lwd = 2)
+        text.units(x = 0.67, y = 0.55, paste0("R~2~: ", round(summary(fit)$r.squared,2)))
+
         lines(c(0, 1, 0.5, 0), c(0, 0, 1,0))
         text(x = 0.5, y = -0.07, 'Bare Ground', xpd = TRUE)
         text(x = 0.15, y = 0.54, 'Herb Cover', xpd = TRUE, srt = 60)
@@ -63,6 +102,7 @@ forDataset <- function(id) {
                 lines(c(0.5-0.5*i, 1-i), c( 1-i, 0), lty = 4, col = '#00000099');
                 text(x=0.45-0.5*i, y=1-i, paste(i*100, '%'), xpd = TRUE, srt = 60)})
         mtext(side = 3, adj = 0.9, name, line = -2)
+       
     }
     fname = paste0("figs/", id, "_vegDist.png")
     png(fname, width = 7.2, height = 7.2 * sqrt(3) * 0.5 * 4/3, res = 300, units = 'in')
@@ -72,7 +112,7 @@ forDataset <- function(id) {
     dev.off()
 }
 lapply(obs, forDataset)
-
+browser()
 png("figs/trasect_AFRICA.png", width = 5, height = 5, units = 'in',res = 300)
 
 fire = mean(brick('../LimFIRE/outputs/fire2000-2014.nc')[[1:12]])*12
