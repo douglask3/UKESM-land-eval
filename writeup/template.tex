@@ -156,38 +156,127 @@ Aim:
 TEXT
 
 
-\section{methods}
+\section{Model overview}
 TEXT
 
+\subsection{UKESM and atmosphere stuff}
 
-\subsection{Metrics}
-TEXT
+\subsection{JULES overview}
 
+\subsubsection{Veg Dynamics}
+
+\subsubsection{Land use}
+
+\subsubsection{Phenology}
+
+\subsubsection{Carbon/photosynthesis}
+
+\subsubsection{Nitrogen}
+
+\subsubsection{Cold stuff}
+
+\subsubsection{Veg snow interactions}
+
+\section{}
+
+\subsection{Evaluation methods}
+
+We use the International Land Model Benchmarking (ILAMB) tool (Collier et al., 2018) here to evaluate model performance across multiple variables compared to observations. ILAMB was designed to provide a quantitative assessment of model fidelity across a wide range of terrestrial biogeochemical processes and interactions with hydrology and climate, within several key categories: the ecosystem and carbon cycle, hydrological cycle, radiation and energy, and forcings. The tool uses remote sensing, reanalysis data and fluxnet site measurements to benchmark performance and produce statistical scores of model results. 
+
+We also use Kelley et al. (2013)
 
 \subsubsection{Annual average}
 The sum the squared (for $NMSE$) or absolute (for $NME$) distance between observations ($obs$) and reconstructed burnt  rea from an ensemble member (sim()) over all cells  ( ) weighted by cell area ( ) and normalised by mean variation in obs
 
+\begin{equation}
+    NME = \frac{\Sigma_i A_i \times  |sim - obs_i |}{\Sigma_i A_i \times |\bar{obs} - obs_i |} \  \text{   and   } \
+    NMSE = \frac{\Sigma_i A_i \times  (sim- obs_i) }{\Sigma_i A_i \times (\bar{obs} - obs_i )}
+\end{equation}
+
+\subsubsection{Seasonal}
+Seasonality comparisons are conducted in three parts as  (Kelley et al., submitted, 2013a): 1)modality - i.e how many “seasons” there are in a given year; 2), phase, or timing, of the season; and 3) seasonal concentration (inverse season length).
+
+To determine the modality of a given cell, we first calculated the monthly climatology. The month of the minimum burnt area from this climatology is defined as the start of the “fire year”. We then find the position of each maxima turning point throughout the year:	
+\begin{equation}
+
+    P = \left\{p_i | \frac{dv(p_i)}{dt} = 0 \wedge \frac{d^2v(p_i)}{dt^2} < 0 \wedge v(p_i) < v(p_{i+1}) \right\}
+
+\end{equation}
+
+where $v(1) = min(v)$
+
+The modality (MOD) is the prominence of each of these turning points (i.e the minimum drop required to the next turning point), weighted by the distance to the next turning point. This is normalised by the height of the month of maximum burnt area
+
+\begin{equation}
+    MOD =1 + \frac{ \Sigma_{i-1} \big( V(p_i) - min\left\{ v(p_i), v(p_{i+1}) \right\} \big) \times \big( 1 - cos(\theta) \big)}{2 \times \big(max(v) - v(1) \big)}
+\end{equation}
+
+If there are no turning points, then modality is set to 0. If there is one turning point, MOD is 1. The higher the number beyond that, the higher the modality. Observational and simulated MOD  was then compared using NME/NMSE.
+
+For phase and concentration, each month, m, can be represented by a vector in the complex plane whose direction (m) corresponds to the time of year and length to the magnitude of the variable for that month:
+\begin{equation}
+    \theta_m = 2 \times \pi \times (m-1) / 12
+\end{equation}
+
+A mean vector L can be calculated by averaging the real (Lx) and imaginary (Ly) parts of the 12 vectors (xm).
+
+\begin{equation}
+    L_x = \Sigma_m x_m \times cos(\theta_m) \ \text{   and   } \
+    L_y = \Sigma_m x_m \times sin(\theta_m)
+\end{equation}
+
+Seasonal concentration (C) is the mean vector length by the annual average of the given variable, whilst seasonal phase (P) is the direction of the vector:
+
+\begin{equation}
+    C = \frac{\sqrt{L_x^2 + L_y^2}}{\Sigma_m x_m}
+\end{equation}
+
+\begin{equation}
+    P arctan{L_x/L_y}
+\end{equation}
+
+C is equal to 1 when a give variable is concentrated into one month, whilse P corresponds to that month. concentration is zero and phase is undefined if the variable  is evenly spread throughout the year, and the is not included in subsequent phase comparisons. Cis compared using NME/NMSE step 1. Phase is compared using mean phase difference (MPD), which represents the average timing erro, as a proportion of the maximum phase mismatch of 6 months.
+
+\begin{equation}
+    MPD = \pi^{-1} \times \Sigma_m A_i \times arccos \big[ cos \big(P_{sim, i} - P_{obs, i} \big) \big] / \Sigma_i A_i 
+\end{equation}
+
+\subsubsection{Metric interpretation}
+Smaller NME, NMSE and MPD scores indicate a better agreement between simulation and observation, with a perfect score (i.e., simulation that perfectly matches observations) of 0. We also used three null models to help interpret the score as per (Burton et al., 2019; Kelley et al., 2019). The mean null model compares the mean of all observations with the observations. For NME and NMSE, the mean null model is always 1 as these metrics are normalised by the mean difference.. The best “single value” model for NME and MM compares the median of observations to observations. By definition, it’s score is less than or equal to the mean model score. The mean and median null model scores for MPD depends on the observations. The “randomly resampled” null model compares randomly-resampled observations (without replacement) to the observations. The score depends on resampling order, so we used 1000 bootstraps to determine the null models distribution. 
+
+\subsection{Benchmark datasets}
+
+\subsubsection{Climate}
+Here we estimate the functional response of GPP to precipitation and surface downward shortwave radiation (SWR). For the global analysis, we use total grid points binned in terms of the independent variable (x) using 25 bins. In each bin, we compute the mean value of the corresponding dependent variable (y) to approximate the functional dependence of y on x. Data points show the mean and the error bars reﬂect the standard deviation range. We then assess the relationships by region using a simple scatter plot, first for South America tropical forest, and then South East Asia. Model data in all cases is the mean of the 9 ensemble members evaluated against observations from GBAF (GPP), CERES (SWR), and GPCP2 (precipitation) for 1982-2008 mean (see plots in section entitled “Climate Relationships”).
+
+\subsubsection{Vegetation cover}
+
+\subsubsection{LAI}
+
+\subsubsection{Carbon (inc. Turnover)}
+
+\subsubsection{Wetland}
+We process the UKESM Historical ensemble members from 2000 - 2014 and calculate the ensemble mean, regridded to 0.5 x 0.5 degrees.
+
+The SWAMPS-GLWD dataset (Poulter et al., 2017) is a 0.5 x 0.5 degree global wetland dynamic dataset that integrates the static Global Lakes and Wetlands Dataset (Lehner and Döll, 2004)with observations of the inundation seasonal cycle from the Surface WAter Microwave Product Series (Schroeder et al., 2015). SWAMPS-GLWD covers 2000 - 2018, overlapping with the UKESM historical up to 2014.
+
+We compare the UKESM wetland fraction (fracWet) to the wetland fraction obtained from SWAMPS-GLWD. We calculate the zonal mean of both data sets between 2000 - 2014, as well as calculating the variability (standard deviation) in the temporal domain.
+
+\subsubsection{River flow}
+Modelled, long-term, annual river flow is compared against observations (Dai et al., 2009). For the direct comparison we use the Dai et al, 2009 dataset from 925 stations which only uses observations and does not infill using land surface model output. Only 1990-2005 mean annual river flow is assessed, because at the sub-annual time-scale some river flow measurements will be impacted by the presence of dams upstream, and dams are not yet parameterised in UKESM1. We only make comparisons with the observations where the time series overlap, which results in a comparison against 134 stations. There is a strong correlation with the multi-annual river flow (figure ***) and obtain a correlation coefficient between modelled and observed  for the multi-annual mean and  log of river flow are 0.96 and 0.84 respectively. If we compare this to a similar off-line run where JULES is forced with observations we obtain correlation coefficients of 0.97 and 0.85 respectively, indicating that on a multi-year time scale UKESM is reproducing river flow well overall across the globe.
 
 \section{results}
 
-\subsection{Vegetation transition}
+\subsection{Vegetation Distribution}
 \begin{itemize}
     \item A lack on mix of tree and herb cover in much of the world, particularly Australia, Africa, Temperate America. The same could be true for Boreal regions, though there is disagreement in the observations here.
     \item Australia and SE Asia also show to tight a transition from non-vegetated to vegetated (R2 triangle figure)
     \item causes too much tree cover extent and, in some places, to much bare ground with very rapid transitions.
     \item grass extent is generally to small, but where grass does occur, there is too much of it.
-\end{itemize}
-
-\subsection{Bare soil}
-\begin{itemize}
     \item Too much bare soil in SE Asia, North Africa, possibly in Australia though depending on observations
-    
-\end{itemize}
-
-\subsection{tree cover extent}
-\begin{itemize}
     \item Too extensive in South Africa, North Africa, Boreal America, SE Asia, 
 \end{itemize}
+
 
 \begin{figure*}[t]
 \includegraphics[width=12cm]{figs/vegDist.png}
@@ -202,6 +291,12 @@ The sum the squared (for $NMSE$) or absolute (for $NME$) distance between observ
 \includegraphics[width=8.3cm]{figs/trasect_AFRICA.png}
 \caption{Transect of vegetation distribution from VCF observations and UKESM ensemble member u-bc179 along the longitude line of xx, spanning central Congo to central Sahara. Purple represents distribution of trees, green grasses and orange bare ground. Blue dotted line is observed mean annual precipitation from CRUTS 4.01 and u-bc179. Red dotted line is observed annual burnt area from GFED4s}
 \end{figure}
+
+\subsubsection{soils}
+
+
+
+% something from Eleanor, Karina
 
 \conclusions  %% \conclusions[modified heading if necessary]
 TEXT
