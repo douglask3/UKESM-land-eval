@@ -28,8 +28,14 @@ cols = list("MAP" = c('#ffffd9','#edf8b1','#c7e9b4','#7fcdbb','#41b6c4',
 limits = list("MAP" = c(0, 10, 50, 100, 500, 1000, 1500, 2000, 3000),       
               "MAT" = c(-15, -10, -5, 0, 5, 10, 15, 20, 25, 30))
 
-mod_scale = c("MAP" = 60*60*24*365.25, "MAT" = 1)
-obs_scale = c("MAP" = 24, "MAT" = 1)
+dcols = list("MAP" = c('#543005','#8c510a','#bf812d','#dfc27d','#f6e8c3','#f5f5f5','#c7eae5','#80cdc1','#35978f','#01665e','#003c30'), 
+            "MAT" = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))
+
+dlimits = list("MAP" = c(-1000, -500, -200, -100, -10, 10, 100, 200, 500, 1000),       
+              "MAT" = c(-10, -5, -2, -1, 1, 2, 5, 10))
+
+mod_scale = c("MAP" = 1, "MAT" = 1)
+obs_scale = c("MAP" = 1, "MAT" = 1)
 
 mod_shift = c("MAP" = 0, "MAT" = -273.15)
 obs_shift = c("MAP" = 0, "MAT" = -273.150)
@@ -122,9 +128,9 @@ plotStuff <- function(name, scales, ...) {
 }
 
 season_sim = plotStuff("UKESM", mod_shift, observation = FALSE)
-season_obs = plotStuff("CRUTS4.01", obs_shift)
+season_obs = plotStuff("Observations", obs_shift)
 
-plotAAVar <- function(var, let, ...) {   
+plotAAVar <- function(var, let, ..., extend_min = FALSE) {   
     clim_files = clim_files[[var]][[1]]
     
     otest = grepl('Observation', clim_files)
@@ -135,23 +141,32 @@ plotAAVar <- function(var, let, ...) {
     
     cols = cols[[var]]
     limits = limits[[var]]
+
+    dcols = dcols[[var]]
+    dlimits = dlimits[[var]]
     e = sd.raster(sim + mod_shift[var])
     mask = raster('data/seamask.nc')
     mask = raster::resample(mask, e) == 0
     e[mask] = NaN
     limits_error = quantile(e, c(0.1, 0.5), na.rm = TRUE)
     plotStandardMap(sim, e = e, limits = limits, cols = cols, limits_error = limits_error)
-    mtextLabs(let[1], 'UKESM', var)     
+    mtextLabs(let[1], 'UKESM', var, line = -0.5)    
+    #if (var == "MAP" && nlayers(obs) == 2) obs[[2]] = obs[[2]]/12
     plotStandardMap(obs, limits = limits, cols = cols)
-    mtextLabs(let[2], 'CRUTS4.01', var)
+    mtextLabs(let[2], 'Observations', var, line = -0.5)
     StandardLegend(obs[[1]], limits = limits, cols = cols,
-                   add = TRUE, oneSideLabels = FALSE, ...)
+                   add = TRUE, oneSideLabels = FALSE, ..., extend_min = extend_min)
     
+    diff = layer.apply(obs, function(i) sim-i)
+    plotStandardMap(diff, limits = dlimits, cols = dcols)
+    mtextLabs(let[2], 'Difference', var, line = -0.5)
+    StandardLegend(diff, limits = dlimits, cols = dcols,
+                   add = TRUE, oneSideLabels = FALSE, ..., extend_min = TRUE)
     return(c(obs, sim))
 }
 max.rater <- function(...) max.raster(...)
-png('figs/annual_average_clims.png', res = 300, units = 'in', width = 7.2, height = 3.7)
-    par(mfcol = c(2,2), mar = rep(0, 4))
+png('figs/annual_average_clims.png', res = 300, units = 'in', width = 7.2, height = 3.7*3/2)
+    par(mfcol = c(3,2), mar = rep(0, 4))
     pr_aa  = plotAAVar('MAP', letters[c(1,3)], units = 'mm/yr')
     tas_aa = plotAAVar('MAT', letters[c(2,4)], units = '~DEG~C'   , extend_min = TRUE)
 dev.off.gitWatermark()
