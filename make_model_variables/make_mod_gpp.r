@@ -19,17 +19,25 @@ run <- function(name, files, job, dat_file) {
         return(invisible())
     }
     openDat <- function(file, years) {
-        dat = brick(file)
+         brickCorrect <- function(file, ...) {
+            dat = brick(file, ...)
+            if (grepl('ncdf/u-', file)) dat = convert365_2_360(dat)
+            return(dat)
+        }
+        dat = brickCorrect(file)
         if (nlayers(dat) == 9) {
             w = sapply(layers, function(i) 1/sum(layers == i))
             dat = dat[[layers]] * w
             return(dat)
         }
-        dat = brick(file, varname = levels[1])
+       
+        dat = brickCorrect(file, varname = levels[1])       
+        
         dates =  sapply(names(dat), function(i) strsplit(i, '.', fixed = TRUE)[[1]])
         yrs = sapply(dates[1,], function(i) strsplit(i, 'X')[[1]][2])
-        index = which(apply(sapply(years, '==', yrs), 1, any))
-        dat = lapply(levels, function(i)  brick(file, varname = i)[[index]])#brick(file, varname = i)[[index]])
+        index = which(apply(sapply(years, '==', yrs), 1, any))        
+        
+        dat = lapply(levels, function(i)  brickCorrect(file, varname = i)[[index]])#brick(file, varname = i)[[index]])
     }
     print("opening")
     dat = lapply(files, openDat, years)
