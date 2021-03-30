@@ -9,7 +9,7 @@ Modalise <- function(r) {
     return(modal_approx)
 }
 
-ModalMap <- function(obs, txt, addLegend, let = NULL,
+ModalMap <- function(obs, txt, addLegend, let = NULL, 
                      cols = modal_cols, limits = modal_limits, 
                      regions = NULL) {
     
@@ -27,7 +27,8 @@ ModalMap <- function(obs, txt, addLegend, let = NULL,
         lapply(model_a, plotStandardMap, limits = limits -1, cols = cols)
     }
     
-    if (!is.null(let)) addLetLab(let)
+    addLetLab(let)
+    
     mtext(txt, side = 2)
     if (addLegend) 
         ModalLegend(modal_approx, limits = limits, cols = cols)
