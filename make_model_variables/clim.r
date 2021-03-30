@@ -27,9 +27,11 @@ run <- function(name, id, obs_file, job) {
             if (all(file.exists(fname_out))) return(brick(fname_out[5]))
             print(file)
             dat = brick(file)
-            dat = getYrsFromLayers(dat, year, NULL)
-            if (grepl('CMAP', start)) dat = dat  *60*60*24*365.25
+            dat = getYrsFromLayers(dat, year, NULL, convert360 = type == 'sim')
+            if (grepl('CMAP', start)) dat = dat * 60*60*24*365.25/12
             
+            if (type == "sim" && name == "precip") dat = dat * 60 * 60 *24 * 365.25/12
+            #if (name == "tas") browser()
             if (is.null(dat)) return(NULL)
             clim = convert2Climatology(dat)
             
@@ -38,8 +40,9 @@ run <- function(name, id, obs_file, job) {
                 clim = clim + 273.15
                 dat = dat + 273.15
             }
-            pc = PolarConcentrationAndPhase(clim, phase_units = "months")
+            pc = PolarConcentrationAndPhase(clim, phase_units = "months")#
             MAD = mean(dat)
+            if (name == "precip") MAD = MAD * 12
         
             writeRaster.Standard.mask <- function(r, ...) {
                 if (!is.null(mask))  r = raster::resample(r, mask)
