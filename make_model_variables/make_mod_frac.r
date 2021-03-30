@@ -41,7 +41,7 @@ run <- function(name, obs_file, lvls, file, job) {
         dat =  getYrsFromLayers(dat, years)    
         return(dat)
     }
-    
+   
     dat = lapply(lvls, openDat)
     for (r in dat[-1]) dat[[1]] = dat[[1]] + r
     dati = dat[[1]]    
@@ -55,7 +55,8 @@ run <- function(name, obs_file, lvls, file, job) {
             levels = as.numeric(obs[-1])
             dat = sum(dat[[levels]])
         } else {
-            dat = brick(obs)
+            dat = brick(obs)/100
+            
             dat = dat[[c(seq(1, nlayers(dat), 12))[-1]]]            
             names(dat) = names(dati)
         }
@@ -73,7 +74,7 @@ run <- function(name, obs_file, lvls, file, job) {
     
     writeRaster.Standard(dati, out_file[1])
     
-    out_file = paste0(out_dir, names(obs_file), '-', name, '-fracCover.nc')
+    out_file = paste0(out_dir, 'Observation', names(obs_file), '-', name, '-fracCover.nc')
     mapply(writeRaster.Standard, obs , out_file)
 }
 #jobs = sapply(list.files(sim_dir), function(i) strsplit(i, "-V")[[1]][1])
