@@ -1,0 +1,163 @@
+\section{Model overview}
+
+The configuration of JULES used in UKESM1, namely JULES-ES, is an extension of the GL7 configuration \citep{wiltshire2020gl7}. JULES-ES represents the surface energy balance, a dynamic snowpack, vertical heat and water fluxes, soil freezing, large scale hydrology, carbon and nitrogen fluxes and storage in both vegetation and soil. JULES uses different discrete "tile" types to represent surface cover. Prescribed tiles are water bodies (lakes, rivers etc.), urban and land-ice. The rest of the land surface is competed over by 13 plant functional types (PFTs), divided by plant type (trees, shrubs and grasses), climate ranges (tropical and temperate/boreal), leaf type (broad or needle leaf) and leaf annual cycle (phenological response: evergreen or deciduous), and grasses by the type of photosynthesis they use (C3, C4). Each grass is further split between natural and imposed land use from crop or pasture, whereby a prescribed crop or pasture fraction only allow C3 or C4 grasses or bare soil \citep{robertson2019local}.
+
+The Top-down Representation of Interactive Foliage and Flora Including Dynamics (TRIFFID) dynamic vegetation model updates the PFT distribution in each grid cell through a height based competition scheme (ref). TRIFFID updates the PFT distribution in each grid cell through a height based competition scheme \citep{harper2016improved} and based on PFT carbon uptake. The RothC soil carbon model \cite{clark2011joint} simulates carbon and nitrogen cycling in the soil. JULES simulates production on a sub-hourly timestep by scaling from stomatal-level conductance up to leaf-level photosynthesis, dependent on available CO2 - and then canopy level gross primary production (GPP). Correspondingly, carbon is respired through plant growth and maintenance to give NPP.  NPP is accumulated and passed to the TRIFFID dynamic global vegetation model (DGVM) every 10 days. TRIFFID in turn updates the allocation to leaf, stem and root and the area covered by each PFT based on available carbon, nitrogen and competition between PFTS \citep{wiltshire2020jules}. Leaf phenology is updated daily for deciduous PFTs.  Litter loss from biomass is input into the soil carbon-nitrogen model. Live biomass loss from vegetation is input into a soil carbon pool, from which the ecosystems temperature and moisture dependent heterotrophic respiration and wetland methane are simulated.
+
+The scheme combines a mean water table depth with the sub-grid distribution of topography \citep{Gedney2019}, producing a distribution of water table depths within the grid box. The inundation fraction is therefore calculated from the proportion of water table depths which are above the surface. The wetland fraction is a subset of this, by excluding water tables which are sufficiently high for stream flow to occur.
+
+
+\hilight{Phil - GL overview}
+\hilight{Colin - UKESM overview}
+\hilight{Eddy R - land use}
+\hilight{Debbie H - Phenology}
+\hilight{Nic - Maybe include methanogenesis here}
+\hilight{Doug I guess (maybe get John E to write something?) - veg snow}
+
+\subsection{Modelling protocol and model runs used}
+
+\citet{sellar2020implementation} describe the procedure used to select initial conditions for the UKESM1 CMIP6 historical ensemble. Here we briefly summarize this procedure. There are two primary requirements in selecting initial conditions;
+\begin{itemize}
+    \item That they are taken from the pre-industrial control run (piControl) after it has attained a temporal equilibrium in global mean surface temperature and surface carbon exchange. Because both surface temperature and carbon fluxes depend on subsurface ocean conditions (and in the case of carbon fluxes also soil and vegetation carbon content) it is therefore important the piControl runs sufficiently long for the deep ocean heat and carbon to come into equilibrium and, likewise, that soil and vegetation carbon also come into an internal balance. This implies running the coupled model, or key components of the coupled model, for thousands of simulated years. The spin-up procedure followed for UKESM1 in CMIP6 is detailed in Yool et al. (2020) and led to a temporally stable piControl climate, as seen in Figure 3 of Sellar et al. (2019) for surface temperature and figures 5 and 6 of Yool et al (2020) for carbon fluxes. Initial conditions for the UKESM1 historical ensemble were selected from the piControl after this equilibrium had been reached.
+    \item We aim to select initial conditions that sample the full range of (unforced) internal variability simulated in the model piControl run. This is so that the resulting historical simulations sample the full range of the model’s internal variability. In the case of UKESM1 we constructed phase diagrams for the piControl of the simulated Atlantic Multidecadal Oscillation (AMO, Kerr 2000) and Interdecadal Pacific Oscillation (IPO, Power et al. 1999), which are two of the leading modes multi-decadal variability in sea surface temperature (see figure 6 in Sellar (2020) for an example of this phase diagram). We then selected initial conditions that evenly sampled the range of AMO and IPO in the piControl. The UKESM1 piControl exhibits periods of multidecadal to centennial variability in SST across the Southern Ocean, linked to periodic deep ocean overturning off Antarctica. As this variability is sufficient to influence global mean SST on centennial timescales, we decided it was important to also sample this variability in our historical initial conditions. Therefore, in addition to sampling the AMO and IPO, we also chose a number of initial conditions that captured the mean and extreme ranges of the piControl Southern Ocean SST variability. Figure 7 in Sellar et al. (20120) illustrates the piControl SST variability over the Southern Ocean and its link to global mean SSTs. Finally, we required each initial condition to be a minimum of 35 model years apart from any other initial condition.
+\end{itemize}
+ 
+
+ 
+\begin{itemize}
+    \item Model deception \citep{Sellar2019-bo}
+    \item Spinup protocol \citep{yool2020spin}
+    \item Simulation protocol \citep{sellar2020implementation}
+    \item N96 grid
+    \item Used mothly outputs for: <<list ensmemble members>>
+\end{itemize}
+
+\section{Evaluation methods}
+
+\subsection{Benchmark datasets}
+
+\subsubsection{Vegetation cover}
+Three satellite land cover data sets were used for vegetation distribution comparisons. The European Space Agency (ESA) Climate Change Initiative Land Cover data (CCI)\cite{hartley2017uncertainty}, the International Geosphere-Biosphere Programme Land Use and Cover Change project (IGBP) \citep{Loveland2000-sx} are based on categorisation of high-resolution land cover data into tile-based fractional covers. Here, we group different PFTs into the following catigories:
+\begin{itemize}
+    \item Tree cover: <<list PFTS>>
+    \item Wood cover: <<list>>
+    \item Herb cover: 
+    \item grass cover:
+    \item total vegetative cover, which combines all vegetative tiles.
+\end{itemize}
+
+\hilight{Andy W/H - How was IBGP processed}
+\hilight{Andy H - How was CCI}
+\hilight{time periods}
+
+MODIS Vegetation Continuous Fields (VCF) collection 6 \citep{Dimiceli_undated-el} is based on 250m resolution measurements of woody and none-vegetative fractions. These were regirdded as per \citep{Kelley2019-yu}, though onto the N96 instead of 0.5 degree grid, for July 2001- June 2014. VCF was used for wood cover, grass cover (1 - fractional wood and none-vegetative fraction) and  total vegetative cover (1- none-vegetative fraction).
+
+\subsubsection{LAI}
+\hilight{Eddy R - we used iLamb LAI, so something for you to fill in :D}
+
+\subsubsection{Carbon (inc. Turnover)}
+Observational soil carbon was estimated to a depth of 1m by combining the Harmonized World Soils Database (HWS:, \cite{nachtergaele2012harmonized}) and Northern Circumpolar Soil Carbon Database (NCSCD, \cite{hugelius2013northern}) soil carbon datasets, where NCSCD was used where overlap occurs. For vegetation carbon, we used the \citep{avitabile2016integrated} observational land biomass dataset. Observational GPP was derived from Fluxnet-MTE originally from monthly estimates of global biosphere-atmosphere fluxes from biogeochemistry group at Max Planck Institute \citet{jung2010recent}. The CARDAMOM (2001-2010) dataset is used for observational heterotrophic respiration \citep{bloom2015cardamom}. 
+
+\subsubsection{Climate}
+Here we estimate the functional response of GPP to precipitation and surface downward shortwave radiation (SWR). For the global analysis, we use total grid points binned in terms of the independent variable (x) using 25 bins. In each bin, we compute the mean value of the corresponding dependent variable (y) to approximate the functional dependence of y on x. Data points show the mean and the error bars reﬂect the standard deviation range. We then assess the relationships by region using a simple scatter plot, first for South America tropical forest, and then South East Asia. Model data in all cases is the mean of the 9 ensemble members evaluated against observations from GBAF (GPP), CERES (SWR), and GPCP2 (precipitation) for 1982-2008 mean (see plots in section entitled “Climate Relationships”).
+
+The WFDEI dataset is used for our observational air temperatures (2001-2010) \citep{weedon2014wfdei}. The GPCC dataset is used for our observational precipitation data \citep{schneider2011gpcc}.
+\hilight{Becky V - can you send me you climate datasets?}
+
+
+
+\subsubsection{Wetland}
+The Wetland Area and Dynamics for Methane Modeling (WAD2M), an updated version of SWAMPS-GLWD \citep{Poulter2017-cx}, is a 0.5 degree global wetland dynamic dataset that integrates the static Global Lakes and Wetlands Dataset \citep{Lehner2004-rm} with observations of the inundation seasonal cycle from the Surface WAter Microwave Product Series \citep{Schroeder2015-ai}. WAD2M covers 2000 - 2018, overlapping with the UKESM historical up to 2014.
+
+We compare the UKESM wetland fraction (fracWet) ensemble mean regridded to 0.5 degrees to the wetland fraction obtained from WAD2M. We calculate the zonal mean of both data sets between 2000 - 2014, as well as calculating the variability (standard deviation) in the temporal domain.
+
+
+\subsubsection{River flow}
+Modelled, long-term, annual river flow is compared against observations from \citet{Dai2009} station data. We comapared 1990-2005 mean annual river flow, because at the sub-annual time-scale some river flow measurements will be impacted by the presence of dams upstream, which are not parameterised in UKESM1. Additional, we only use stations which that do not infill using land surface model output. which results in a comparison against 134 stations with overlapping time series. 
+
+\subsection{metrics}
+\hilight{Do we need this next paragraph?}
+We use the International Land Model Benchmarking (ILAMB) \citep{Collier2018-ai} and   \citet{Kelley2013-ey, rabin2017fire} benchamrking tools to evaluate model performance across multiple variables compared to observations. Both provides a quantitative assessment of model fidelity across a wide range of terrestrial biogeochemical processes and interactions with hydrology and climate, within several key categories: the ecosystem and carbon cycle, hydrological cycle, radiation and energy, and forcings. The tool uses remote sensing, reanalysis data and fluxnet site measurements to benchmark performance and produce statistical scores of model results. 
+
+
+\subsection{Cover distributions}
+We compared fractional cover using the area weighted Manhattan Metric ($MM$) and Square Chord Distance ($SCD$) \citep{Kelley2013-ey}.
+
+\begin{equation}
+    MM = \frac{\Sigma_i A_i \times \Sigma_j  |sim_{i,j} - obs_{i,j} |}{\Sigma_i A_i} \  \text{   and   } \
+    SCD = \frac{\Sigma_i A_i \times \Sigma_j (sim_{i,j} - obs_{i,j} )^2}{\Sigma_i A_i}
+\end{equation}
+
+where $A_i$ is the grid cell areas, $sim_{i,j}$ is simulated and $obs_{i,j}$ observed fractional cover of cover type, $j$ in cell $i$. $\Sigma_j sim_{i,j}$ and $\Sigma_j obs_{i,j}$.
+
+\subsection{Annual average comparisons}
+We made annual average comparisons using $NME$ and $NMSE$ metrics. Here, the sum the squared (for $NMSE$) or absolute (for $NME$) distance between observations ($obs_i$) and reconstructed burnt area from an ensemble member ($sim_i$) are normalised by mean variation in obs:
+
+\begin{equation}
+    NME = \frac{\Sigma_i A_i \times  |sim_i - obs_i |}{\Sigma_i A_i \times |\bar{obs} - obs_i |} \  \text{   and   } \
+    NMSE = \frac{\Sigma_i A_i \times  (sim_i- obs_i) }{\Sigma_i A_i \times (\bar{obs} - obs_i )}
+\end{equation}
+
+\subsection{Seasonal}
+Seasonality comparisons are conducted in three parts as  \citet{kelley2013comprehensive, kelley2021low}:
+
+\begin{itemize}
+    \item \textit{modality} - i.e how many “seasons” there are in a given year. To determine the modality of a given cell, we first calculated the monthly climatology. The month of the minimum burnt area from this climatology is defined as the start of the “fire year”. We then find the position of each maxima turning point throughout the year:	
+\begin{equation}
+    P = \left\{p_i | \frac{dv(p_i)}{dt} = 0 \wedge \frac{d^2v(p_i)}{dt^2} < 0 \wedge v(p_i) < v(p_{i+1}) \right\}
+\end{equation}
+
+where $v(1) = min(v)$
+
+The modality (MOD) is the prominence of each of these turning points (i.e the minimum drop required to the next turning point), weighted by the distance to the next turning point. This is normalised by the height of the month of maximum burnt area
+
+\begin{equation}
+    MOD =1 + \frac{ \Sigma_{i-1} \big( V(p_i) - min\left\{ v(p_i), v(p_{i+1}) \right\} \big) \times \big( 1 - cos(\theta) \big)}{2 \times \big(max(v) - v(1) \big)}
+\end{equation}
+
+If there are no turning points, then modality is set to 0. If there is one turning point, MOD is 1. The higher the number beyond that, the higher the modality. Observational and simulated MOD  was then compared using NME/NMSE.
+
+    \item \textit{Phase} is the timing of the season, assuming one season in the year. For phase each month, $m$, can be represented by a vector in the complex plane whose direction corresponds to the time of year and length to the magnitude of the variable for that month:
+\begin{equation}
+    \theta_m = 2 \times \pi \times (m-1) / 12
+\end{equation}
+
+A mean vector, $L$, can be calculated by averaging the real ($L_x$) and imaginary ($L_y$) parts of the 12 vectors ($x_m$).
+
+\begin{equation}
+    L_x = \Sigma_m x_m \times cos(\theta_m) \ \text{   and   } \
+    L_y = \Sigma_m x_m \times sin(\theta_m)
+\end{equation}
+
+The phase ($P$) of this vector is its direction:
+\begin{equation}
+    P  = arctan{L_x/L_y}
+\end{equation}
+
+phase is undefined if the variable  is evenly spread throughout the year which, in reality, only occurs the $\Sigma_m x = 0$. If this is the case for phase from either simulation ($P_{sim, i}$) and observation ($P_{obs, i}$), then they are removed from analysis. Otherwise, $P_{sim, i}$ and $P_{obs, i}$ are compared using mean phase difference ($MPD$), which represents the average timing error, as a proportion of the maximum phase mismatch of 6 months.
+
+\begin{equation}
+    MPD = \pi^{-1} \times \Sigma_m A_i \times arccos \big[ cos \big(P_{sim, i} - P_{obs, i} \big) \big] / \Sigma_i A_i 
+\end{equation}
+
+    \item Seasonal concentration is how concentrated the season is around this peak phase, again assuming a single season - i.e the inverse of season length. The concentration of $L$ ($C$) is the mean vector length by the annual average of the given variable:
+
+\begin{equation}
+    C = \frac{\sqrt{L_x^2 + L_y^2}}{\Sigma_m x_m}
+\end{equation}
+
+$C$ is equal to 1 when a give variable is concentrated into one month (and $P$ corresponds to that month), and approaches 0 as the variables becomes evenly spread throughout the year. Again, if $\Sigma_m x = 0$ for either simulation or observation, then the grid cell is removed from comparison. Simulated and observed concentration ($C_{sim, i}$ and $C_{obs, i}$ respectively) are then compared using NME/NMSE step 1.
+
+\end{itemize}
+
+\subsection{Metric interpretation}
+Smaller NME, NMSE and MPD scores indicate a better agreement between simulation and observation, with a perfect score (i.e., simulation that perfectly matches observations) of 0. We also used three null models to help interpret the score as per \citet{Burton2019-by, Kelley2019-yu}. The mean null model compares the mean of all observations with the observations. For NME and NMSE, the mean null model is always 1 as these metrics are normalised by the mean difference.. The best “single value” model for NME and MM compares the median of observations to observations. By definition, it’s score is less than or equal to the mean model score. The mean and median null model scores for MPD depends on the observations. The “randomly resampled” null model compares randomly-resampled observations (without replacement) to the observations. The score depends on resampling order, so we used 1000 bootstraps to determine the null models distribution. 
+
+
+\subsection{Turnover times}
+We follow the common definition of ecosystem carbon turnover time as the ratio between the total carbon stocks and the outflux. For a terrestrial ecosystem, the total carbon stock is comprised of vegetation carbon and soil carbon, and the outflux is the carbon loss from the ecosystem, such as autotrophic respiration from plants and heterotrophic respiration from the soil. We can make a steady state assumption, which implies that the outflux of carbon into the ecosystem is equal to the influx.  Therefore, ecosystem carbon turnover time can be considered using the following equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/GPP. Where, $\tau_\mathrm{e}$ is ecosystem carbon turnover time, cSoil is soil carbon, cVeg is vegetation carbon, and GPP is gross primary production.
+
+We define soil carbon turnover as the ratio between the total carbon stocks and the outflux. For terrestrial soils, the total carbon stock is the total soil carbon stores and the outflux is heterotrophic respiration. Therefore, soil carbon turnover time can be considered using the following equation $\tau_\mathrm{s}$ = cSoil/$R_\mathrm{h}$. Where, $\tau_\mathrm{s}$ is soil carbon turnover, cSoil is soil carbon, and $R_\mathrm{h}$ is heterotrophic respiration.
+
+The analysis was completed using model output from the historical simulation of the UKESM1-0-LL r1i1p1f2 variant. A reference time period was considered, 2001-2010, to best match the observational data time frame considered, then monthly model output data was time averaged over this period. The following output variables were considered in this analysis: ‘soil carbon content’ (cSoil) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘vegetation carbon content’ (cVeg) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘gross primary production’ (GPP) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$,  ‘heterotrophic respiration carbon flux’ (Rh) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, ‘precipitation flux’ (Pr) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, and ‘air temperature’ (tas) in K.
+The variables cSoil, cVeg, and GPP were used to obtain values for ecosystem carbon turnover time ($\tau_\mathrm{e}$) in years, using the equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/(GPP ∗ 86400 ∗ 365). The variables cSoil and $R_\mathrm{h}$ were used to obtain values for soil carbon turnover time ($\tau_\mathrm{s}$) in years, using the equation $\tau_\mathrm{s}$ = cSoil/($R_\mathrm{h}$ ∗ 86400 ∗ 365). The model precipitation units were converted from $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$ to $\mathrm{kg} \mathrm{m}^{−2} \mathrm{yr}^{−1}$ for consistency. The model temperature variable units were converted from K to $^\circ$C. 

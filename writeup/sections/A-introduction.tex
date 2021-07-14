@@ -1,0 +1,17 @@
+\introduction  %% \introduction[modified heading if necessary]
+
+The UK Earth System Model (UKESM1,\cite{Sellar2019-bo}) includes an interactive land-surface scheme through coupling to the Joint UK Land Environment Simulator (JULES; \cite{best2011joint,clark2011joint}). Feedback between land and atmosphere includes surface energy balance, a dynamic snowpack, vertical heat and water fluxes, soil freezing, large-scale hydrology, carbon and nitrogen fluxes, and storage in both vegetation and soil. To provide these feedbacks, JULES represents terrestrial carbon and nitrogen cycles \citep{wiltshire2020jules}, including dynamic vegetation and representation of agricultural land-use change \citep{robertson2019local}. It includes additional development to plant physiology and functional types \citep{harper2016improved, harper2018vegetation}. UKESM1 couples JULES to the HadGEM3-GC3.1 climate model (GC3.1 - \cite{kuhlbrodt2018low, williams2018met}) and unified troposphere-stratosphere chemistry and multi-species modal aerosol scheme (UKCA; ref). GC3.1 is also coupled to ocean biogeochemistry (BGC; ref.). 
+
+
+<<A bit of UKESM history, including previous evaluations Led to land being included UK Earth System Models.>> However, the land surface's performance depends on both land surface and climate biases from the rest of the model, which adds complexity in identifying the source of any mismatch between simulation and observation. However, determining the causes of these biases is vital so that model development is targets overall model performance and realism, rather than simply obtaining better metric scores.
+
+Here, we identify biases in several key land diagnostics in UKESM and attribute those biases to the simulation of the land by JULES-ES or climate biases from the rest of UKESM. We start by introducing the variables and corresponding observations and benchmarking methods we use for JULES-ES evaluation before outlining broad-scale benchmarking results. We then <<link these together>>. We then finish by identifying x development priorities <<list>> based on these and describe how each should be introduced to help improve the source of simulation error.
+
+\begin{itemize}
+    \item Fire
+    \item Soils
+    \item Permafrost
+    \item crop
+    \item innundation
+    \item acclimation.
+\end{itemize}

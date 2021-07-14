@@ -1,0 +1,23 @@
+\section{Pathway for future development}
+
+\subsection{Fire}
+\hilight{Chantelle/Doug}
+Within JULES, the land surface component of UKESM1, the INteractive Fire and Emission algoRithm for Natural envirOnments (INFERNO) is used to calculate burned area and fire emissions \citep{Mangeon2016}. Fuel and soil moisture simulated by the DGVM, together with climate reanalysis, gives flammability, which is combined with prescribed ignitions from population and lightning to diagnose burned area and species emissions. Recent developments to the model include coupling between burned area and dynamic vegetation to represent vegetation mortality, which improves the distribution of vegetation in offline simulations using climate reanalysis \citep{Burton2019}. Other work is ongoing in coupling fire emissions from INFERNO to the atmosphere-only configuration of UKESM1, enabling emissions and aerosols to influence atmospheric chemistry, radiation, clouds and weather and feedback on fire, as well as implementing lightening ignitions from the model \citep{Joao2020}. These component developments within the land-surface and atmosphere will be brought together to form a major new development of fully coupled fire in the next version of UKESM. 
+
+\subsection{Soils}
+\hilight{Eleanor(/Karina? - any summary from that specialy report thing?}  I've currently added the permafrost bit in the section below.....
+
+\subsection{Permafrost}
+Permafrost (soil which is permanently frozen) presence has been evaluated in both HadGEM3 and UKESM1 \citep{Sellar2019-bo,burke2020evaluating}. \cite{burke2020evaluating} found that the simulated permafrost extent fell within the range of the observations for both models. However, they also found that the maximum summer thaw depth was too deep. This is partly because the soil is poorly resolved with only 4 soil layers in the top 3 m. Therefore one priority for the next configuration is to increase the number of soil layers. Recent developments in an offline version of JULES include a vertically resolved soil biogeochemsitry model \citep{wiltshire2020jules,burke2017vertical}. This enables the permafrost carbon feedback to be quantified \citep{burke2017quantifying} and will be included in a future version of UKESM.
+
+\subsection{Inundation}
+Inundation in UKESM is currently limited to that caused by groundwater. Incorporating inundation caused by rivers "over-banking" in JULES is currently underway  \citep{Dadson2010,Lewis2018} and is a priority for the next configuration. The large amount of evaporation from inundated open water is also important and should be included \citep{Dadson2010}. Adding tropical soils are shown to improve the spatial pattern of inundation in the tropics \citep{Gedney2019}.
+
+
+\subsection{Methane}
+\hilight{Gerd agreed to provide paragraph}
+
+add some stuff about soil moisture
+
+\conclusions  %% \conclusions[modified heading if necessary]
+TEXT
