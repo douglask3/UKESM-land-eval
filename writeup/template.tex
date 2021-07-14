@@ -184,21 +184,21 @@
 
 \maketitle
 
-\hilight{Should I add Jeremy? Marc? Yangming? Richard? Steve? Maggie? V? Andrew H? (I think I used his cci data)}
+\hilight{Should I add Jeremy? Marc? Yangming? Richard? Steve? Maggie? V?}
 \includegraphics[width=4cm]{figs/dino.png}
 
 
 \begin{abstract}
 \textbf{ Background/knowledge gap:} 
-Effective targetted development of the land surface component, JULES-ES, within the UK Earth System Model relies on identifying the source of biases in model performance. 
+Effective targetted development of the land surface component, JULES-ES, within the UK Earth System Model will rely on identifying the source of biases in model performance. 
 
 \textbf{Aim:} 
-Here, we investigate the propagation of land surface biases in UKESM and attribute the sources of these biases' to JULES-ES or climate model performance and missing land surface processes. 
+Here, we investigate the propagation of land surface biases in UKESM and attribute the sources of these biases' to JULES-ES or climate model performance and missing land surface processes, and identify potential model developments that might alleviate these biases.
 
 \textbf{Methods}: 
 We perform a comprehensive global assessment of land surface climate inputs, broadscale vegetation distribution, productivity, carbon storage and turnover, and water fluxes.  Assessment is made against observations wherever possible, focusing on UKESMs historic ensemble performance from 2001-2014. We assess biases in climate space to attribute between climate inputs and land surface performance. We also use drought metrics linked to land surface temperature to link carbon, hydrological and climate input biases.
 
-\textbf{Key results:} Broadscale vegetation distribution biases include too much tree cover in grassy biomes, with corresponding high total vegetation carbon and <<turnover time>>.  These regions coincide with areas of burning, not represented in the model, and highly seasonal moisture availability in shorter, srubby vegetation. The Sahel, western India and Northern Australia are expectations, with too little vegetation cover and too-rapid a transition between productive and arid areas. In these regions, precipitation and temperature biases lead to drier conditions and less productivity than JULES-ES driven by observations.
+\textbf{Key results:} Broadscale vegetation distribution biases include too much tree cover in grassy biomes, with corresponding high total vegetation carbon and <<turnover time>>.  These regions coincide with areas of burning, which is not represented in the model, and highly seasonal moisture availability in shorter, scrubby vegetation. The Sahel, western India and Northern Australia are expectations, with too little vegetation cover and too-rapid a transition between productive and arid areas. In these regions, precipitation and temperature biases lead to drier conditions and less productivity than JULES-ES driven by observations.
 
 <<more results>>
 
@@ -230,92 +230,110 @@ Here, we identify biases in several key land diagnostics in UKESM and attribute 
 \end{itemize}
 
 \section{Model overview}
-The configuration of JULES used in UKESM1, namely JULES-ES, is an extension of the GL7 configuration \citep{wiltshire2020gl7}. JULES-ES represents the surface energy balance, a dynamic snowpack, vertical heat and water fluxes, soil freezing, large scale hydrology, carbon and nitrogen fluxes and storage in both vegetation and soil. JULES uses different discrete "tile" types to represent surface cover. Prescribed tiles are water bodies (lakes, rivers etc.), urban and land-ice. The rest of the land surface is competed over by 13 plant functional types (PFTs), divided by plant type (trees, shrubs and grasses), climate ranges (tropical and temperate/boreal), leaf type (broad or needle leaf) and leaf annual cycle (phenological response: evergreen or deciduous), and grasses by the type of photosynthesis they use (C3, C4). Each grass is further split between natural and imposed land use from crop or pasture, whereby a prescribed crop or pasture fraction only allow C3, C4 or bare soil (ref:Roberston). The Top-down Representation of Interactive Foliage and Flora Including Dynamics (TRIFFID) dynamic vegetation model (Wiltshire et al. 2020a) simulates dynamic vegetation,  carbon and nitrogen cycling in the soil and the RothC soil carbon model (Clarke et al. 2011). TRIFFID updates the PFT distribution in each grid cell through a height based competition scheme (ref)
+
+The configuration of JULES used in UKESM1, namely JULES-ES, is an extension of the GL7 configuration \citep{wiltshire2020gl7}. JULES-ES represents the surface energy balance, a dynamic snowpack, vertical heat and water fluxes, soil freezing, large scale hydrology, carbon and nitrogen fluxes and storage in both vegetation and soil. JULES uses different discrete "tile" types to represent surface cover. Prescribed tiles are water bodies (lakes, rivers etc.), urban and land-ice. The rest of the land surface is competed over by 13 plant functional types (PFTs), divided by plant type (trees, shrubs and grasses), climate ranges (tropical and temperate/boreal), leaf type (broad or needle leaf) and leaf annual cycle (phenological response: evergreen or deciduous), and grasses by the type of photosynthesis they use (C3, C4). Each grass is further split between natural and imposed land use from crop or pasture, whereby a prescribed crop or pasture fraction only allow C3 or C4 grasses or bare soil \citep{robertson2019local}.
+
+The Top-down Representation of Interactive Foliage and Flora Including Dynamics (TRIFFID) dynamic vegetation model updates the PFT distribution in each grid cell through a height based competition scheme (ref). TRIFFID updates the PFT distribution in each grid cell through a height based competition scheme \citep{harper2016improved} and based on PFT carbon uptake. The RothC soil carbon model \cite{clark2011joint} simulates carbon and nitrogen cycling in the soil. JULES simulates production on a sub-hourly timestep by scaling from stomatal-level conductance up to leaf-level photosynthesis, dependent on available CO2 - and then canopy level gross primary production (GPP). Correspondingly, carbon is respired through plant growth and maintenance to give NPP.  NPP is accumulated and passed to the TRIFFID dynamic global vegetation model (DGVM) every 10 days. TRIFFID in turn updates the allocation to leaf, stem and root and the area covered by each PFT based on available carbon, nitrogen and competition between PFTS \citep{wiltshire2020jules}. Leaf phenology is updated daily for deciduous PFTs.  Litter loss from biomass is input into the soil carbon-nitrogen model. Live biomass loss from vegetation is input into a soil carbon pool, from which the ecosystems temperature and moisture dependent heterotrophic respiration and wetland methane are simulated.
+
+The scheme combines a mean water table depth with the sub-grid distribution of topography \citep{Gedney2019}, producing a distribution of water table depths within the grid box. The inundation fraction is therefore calculated from the proportion of water table depths which are above the surface. The wetland fraction is a subset of this, by excluding water tables which are sufficiently high for stream flow to occur.
+
 
 \hilight{Phil - GL overview}
 \hilight{Colin - UKESM overview}
-
-
-
-\subsection{Vegetation and Soil Carbon}
-
-Terrestrial processes in UKESM1 are represented by the Joint UK Land Environment Simulator (JULES; ). JULES represents the surface energy balance, a dynamic snowpack, vertical heat and water fluxes, soil freezing, large scale hydrology, and carbon and nitrogen fluxes and storage in both vegetation and soil. Dynamic vegetation and carbon and nitrogen cycling in the soil are provided by the Top-down Representation of Interactive Foliage and Flora Including Dynamics (TRIFFID) dynamic vegetation model \cite{wiltshire2020jules} and the RothC soil carbon model \cite{clark2011joint}. TRIFFID updates the PFT distribution in each grid cell through a height based competition scheme \citep{harper2016improved}. The configuration of JULES used in UKESM1 namely JULES-ES is an extension of the GL7 configuration \citep{wiltshire2020gl7} and described below in Section \ref{sec:gl7}). JULES-ES additionally includes TRIFFID, a simple landuse model and dynamic wetlands \color{red} more and references? \color{black}. 
- 
-
-
-\subsection{JULES-ES}
-
-Summarised below is a description of the key differences between the GL7 configuration and the JULES-ES configuration used in UKESM1. In JULES-ES vegetation can be one of 13 plant functional types (PFTs), divided by plant type (trees, shrubs and grasses), climate ranges (tropical and temperate/boreal), leaf type (broad or needleleaf) and leaf annual cycle (phenological response: evergreen or deciduous), and grasses by the type of photosynthesis they use (C3, C4) with 4 of the PFTs reserved for an imposed land use.  \\
-
-%not sure this is relevant
-% I think it might be, cos of some veg dynamics stuff we havent quiet got in yet....
-\subsubsection{Vegetation and Soil Carbon}
-JULES simulates production on a sub-hourly timestep by scaling from stomatal-level conductance up to leaf level photosynthesis – which is dependent on available CO2 - and then canopy level gross primary production (GPP). Correspondingly, carbon is respired through plant growth and maintenance to give NPP. NPP is accumulated and passed to the TRIFFID dynamic global vegetation model (DGVM) every 10 days. TRIFFID in turn updates the allocation to leaf, stem and root and the area covered by each PFT based on available carbon, nitrogen and competition between PFTS \citep{wiltshire2020jules}. Leaf phenology is updated daily for deciduous PFTs. Litter loss from biomass is input into the soil carbon-nitrogen model. Soil carbon decomposes at a rate driven by soil moisture, temperature and available nutrients. 
-
-
-
-accumulated temperature-dependant leaf turnover rates. Live biomass loss from vegetation is input into a soil carbon pool, from which the ecosystems temperature and moisture dependent heterotrophic respiration and wetland methane are simulated. 
-\hilight{Andy W - please expand :D}
-
-\subsubsection{Carbon and nitrogen cycle}
-The carbon cycling within JULES is a well established model that was used in both HadGEM2-ES \citep{collins2011development} and the Global Carbon Budget annual assessment up to 2018 \citep{le2018global}. For UKESM1 a significant upgrade to the terrestrial carbon cycle was made \citep{Sellar2019-bo} to include an interactive nitrogen cycle \citep{wiltshire2020jules}, extended PFTs \cite{harper2016improved} and land-use change. This configuration has been in use as part of the Global Carbon Budget assessment since 2019 \citep{essd-11-1783-2019}. In TRIFFID, the nitrogen cycle closely follows the structure of the carbon cycle. Inputs to TRIFFID are via biological fixation and nitrogen deposition, while losses occur via leaching and gas loss. JULES simulates a nitrogen-limited ecosystem by reducing the net primary productivity if there is insufficient inorganic nitrogen in the soil to maintain the C:N ratio of the vegetation with any excess carbon assumed to be lost from the system.\\
-
-\subsubsection{Land use}
-\hilight{Eddy R}
-
-\subsubsection{Phenology}
-\hilight{Debbie H}
-
-\subsubsection{Wetlands}
-The scheme combines a mean water table depth with the sub-grid distribution of topography \citep{Gedney2019}, producing a distribution of water table depths within the grid box. The inundation fraction is therefore calculated from the proportion of water table depths which are above the surface. The wetland fraction is a subset of this, by excluding water tables which are sufficiently high for stream flow to occur.
-
-\hilight{Maybe include methanogenesis here}
-
-
-\subsubsection{Veg snow interactions}
-\hilight{Doug I guess (maybe get John E to write something?)}
+\hilight{Eddy R - land use}
+\hilight{Debbie H - Phenology}
+\hilight{Nic - Maybe include methanogenesis here}
+\hilight{Doug I guess (maybe get John E to write something?) - veg snow}
 
 \subsection{Modelling protocol and model runs used}
-\hilight{Colin/Andy/Alistair/Jane?}
+
+\citet{sellar2020implementation} describe the procedure used to select initial conditions for the UKESM1 CMIP6 historical ensemble. Here we briefly summarize this procedure. There are two primary requirements in selecting initial conditions;
+\begin{itemize}
+    \item That they are taken from the pre-industrial control run (piControl) after it has attained a temporal equilibrium in global mean surface temperature and surface carbon exchange. Because both surface temperature and carbon fluxes depend on subsurface ocean conditions (and in the case of carbon fluxes also soil and vegetation carbon content) it is therefore important the piControl runs sufficiently long for the deep ocean heat and carbon to come into equilibrium and, likewise, that soil and vegetation carbon also come into an internal balance. This implies running the coupled model, or key components of the coupled model, for thousands of simulated years. The spin-up procedure followed for UKESM1 in CMIP6 is detailed in Yool et al. (2020) and led to a temporally stable piControl climate, as seen in Figure 3 of Sellar et al. (2019) for surface temperature and figures 5 and 6 of Yool et al (2020) for carbon fluxes. Initial conditions for the UKESM1 historical ensemble were selected from the piControl after this equilibrium had been reached.
+    \item We aim to select initial conditions that sample the full range of (unforced) internal variability simulated in the model piControl run. This is so that the resulting historical simulations sample the full range of the model’s internal variability. In the case of UKESM1 we constructed phase diagrams for the piControl of the simulated Atlantic Multidecadal Oscillation (AMO, Kerr 2000) and Interdecadal Pacific Oscillation (IPO, Power et al. 1999), which are two of the leading modes multi-decadal variability in sea surface temperature (see figure 6 in Sellar (2020) for an example of this phase diagram). We then selected initial conditions that evenly sampled the range of AMO and IPO in the piControl. The UKESM1 piControl exhibits periods of multidecadal to centennial variability in SST across the Southern Ocean, linked to periodic deep ocean overturning off Antarctica. As this variability is sufficient to influence global mean SST on centennial timescales, we decided it was important to also sample this variability in our historical initial conditions. Therefore, in addition to sampling the AMO and IPO, we also chose a number of initial conditions that captured the mean and extreme ranges of the piControl Southern Ocean SST variability. Figure 7 in Sellar et al. (20120) illustrates the piControl SST variability over the Southern Ocean and its link to global mean SSTs. Finally, we required each initial condition to be a minimum of 35 model years apart from any other initial condition.
+\end{itemize}
+ 
+
+ 
 \begin{itemize}
     \item Model deception \citep{Sellar2019-bo}
     \item Spinup protocol \citep{yool2020spin}
     \item Simulation protocol \citep{sellar2020implementation}
+    \item N96 grid
+    \item Used mothly outputs for: <<list ensmemble members>>
 \end{itemize}
 
 \section{Evaluation methods}
 
-We use the International Land Model Benchmarking (ILAMB) \citep{Collier2018-ai} and fireMIP \citep{Kelley2013-ey, rabin2017fire}. benchamrking tools to evaluate model performance across multiple variables compared to observations. ILAMB was designed to provide a quantitative assessment of model fidelity across a wide range of terrestrial biogeochemical processes and interactions with hydrology and climate, within several key categories: the ecosystem and carbon cycle, hydrological cycle, radiation and energy, and forcings. The tool uses remote sensing, reanalysis data and fluxnet site measurements to benchmark performance and produce statistical scores of model results. 
+\subsection{Benchmark datasets}
+
+\subsubsection{Vegetation cover}
+Three satellite land cover data sets were used for vegetation distribution comparisons. The European Space Agency (ESA) Climate Change Initiative Land Cover data (CCI)\cite{hartley2017uncertainty}, the International Geosphere-Biosphere Programme Land Use and Cover Change project (IGBP) \citep{Loveland2000-sx} are based on categorisation of high-resolution land cover data into tile-based fractional covers. Here, we group different PFTs into the following catigories:
+\begin{itemize}
+    \item Tree cover: <<list PFTS>>
+    \item Wood cover: <<list>>
+    \item Herb cover: 
+    \item grass cover:
+    \item total vegetative cover, which combines all vegetative tiles.
+\end{itemize}
+
+\hilight{Andy W/H - How was IBGP processed}
+\hilight{Andy H - How was CCI}
+\hilight{time periods}
+
+MODIS Vegetation Continuous Fields (VCF) collection 6 \citep{Dimiceli_undated-el} is based on 250m resolution measurements of woody and none-vegetative fractions. These were regirdded as per \citep{Kelley2019-yu}, though onto the N96 instead of 0.5 degree grid, for July 2001- June 2014. VCF was used for wood cover, grass cover (1 - fractional wood and none-vegetative fraction) and  total vegetative cover (1- none-vegetative fraction).
+
+\subsubsection{LAI}
+\hilight{Eddy R - we used iLamb LAI, so something for you to fill in :D}
+
+\subsubsection{Carbon (inc. Turnover)}
+Observational soil carbon was estimated to a depth of 1m by combining the Harmonized World Soils Database (HWS:, \cite{nachtergaele2012harmonized}) and Northern Circumpolar Soil Carbon Database (NCSCD, \cite{hugelius2013northern}) soil carbon datasets, where NCSCD was used where overlap occurs. For vegetation carbon, we used the \citep{avitabile2016integrated} observational land biomass dataset. Observational GPP was derived from Fluxnet-MTE originally from monthly estimates of global biosphere-atmosphere fluxes from biogeochemistry group at Max Planck Institute \citet{jung2010recent}. The CARDAMOM (2001-2010) dataset is used for observational heterotrophic respiration \citep{bloom2015cardamom}. 
+
+\subsubsection{Climate}
+Here we estimate the functional response of GPP to precipitation and surface downward shortwave radiation (SWR). For the global analysis, we use total grid points binned in terms of the independent variable (x) using 25 bins. In each bin, we compute the mean value of the corresponding dependent variable (y) to approximate the functional dependence of y on x. Data points show the mean and the error bars reﬂect the standard deviation range. We then assess the relationships by region using a simple scatter plot, first for South America tropical forest, and then South East Asia. Model data in all cases is the mean of the 9 ensemble members evaluated against observations from GBAF (GPP), CERES (SWR), and GPCP2 (precipitation) for 1982-2008 mean (see plots in section entitled “Climate Relationships”).
+
+The WFDEI dataset is used for our observational air temperatures (2001-2010) \citep{weedon2014wfdei}. The GPCC dataset is used for our observational precipitation data \citep{schneider2011gpcc}.
+\hilight{Becky V - can you send me you climate datasets?}
+
+
+
+\subsubsection{Wetland}
+The Wetland Area and Dynamics for Methane Modeling (WAD2M), an updated version of SWAMPS-GLWD \citep{Poulter2017-cx}, is a 0.5 degree global wetland dynamic dataset that integrates the static Global Lakes and Wetlands Dataset \citep{Lehner2004-rm} with observations of the inundation seasonal cycle from the Surface WAter Microwave Product Series \citep{Schroeder2015-ai}. WAD2M covers 2000 - 2018, overlapping with the UKESM historical up to 2014.
+
+We compare the UKESM wetland fraction (fracWet) ensemble mean regridded to 0.5 degrees to the wetland fraction obtained from WAD2M. We calculate the zonal mean of both data sets between 2000 - 2014, as well as calculating the variability (standard deviation) in the temporal domain.
+
+
+\subsubsection{River flow}
+Modelled, long-term, annual river flow is compared against observations from \citet{Dai2009} station data. We comapared 1990-2005 mean annual river flow, because at the sub-annual time-scale some river flow measurements will be impacted by the presence of dams upstream, which are not parameterised in UKESM1. Additional, we only use stations which that do not infill using land surface model output. which results in a comparison against 134 stations with overlapping time series. 
+
+\subsection{metrics}
+\hilight{Do we need this next paragraph?}
+We use the International Land Model Benchmarking (ILAMB) \citep{Collier2018-ai} and   \citet{Kelley2013-ey, rabin2017fire} benchamrking tools to evaluate model performance across multiple variables compared to observations. Both provides a quantitative assessment of model fidelity across a wide range of terrestrial biogeochemical processes and interactions with hydrology and climate, within several key categories: the ecosystem and carbon cycle, hydrological cycle, radiation and energy, and forcings. The tool uses remote sensing, reanalysis data and fluxnet site measurements to benchmark performance and produce statistical scores of model results. 
 
 
 \subsection{Cover distributions}
-Compared using the Manhattan Metric ($MM$) and Square Chord Distance ($SCD$) \citep{Kelley2013-ey}.
+We compared fractional cover using the area weighted Manhattan Metric ($MM$) and Square Chord Distance ($SCD$) \citep{Kelley2013-ey}.
 
 \begin{equation}
-    MM = \frac{\Sigma_i A_i \times \Sigma_j  |p_{i,j} - q_{i,j} |}{\Sigma_i A_i} \  \text{   and   } \
-    SCD = \frac{\Sigma_i A_i \times \Sigma_j (p_{i,j} - q_{i,j} )^2}{\Sigma_i A_i}
+    MM = \frac{\Sigma_i A_i \times \Sigma_j  |sim_{i,j} - obs_{i,j} |}{\Sigma_i A_i} \  \text{   and   } \
+    SCD = \frac{\Sigma_i A_i \times \Sigma_j (sim_{i,j} - obs_{i,j} )^2}{\Sigma_i A_i}
 \end{equation}
 
-\subsection{Turnover times}
-We follow the common definition of ecosystem carbon turnover time as the ration between the total carbon stocks and the outflux. For a terrestrial ecosystem, the total carbon stock is comprised of vegetation carbon and soil carbon, and the outflux is the carbon loss from the ecosystem, such as autotrophic respiration from plants and heterotrophic respiration from the soil. We can make a steady state assumption, which implies that the outflux of carbon into the ecosystem is equal to the influx.  Therefore, ecosystem carbon turnover time can be considered using the following equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/GPP. Where, $\tau_\mathrm{e}$ is ecosystem carbon turnover time, cSoil is soil carbon, cVeg is vegetation carbon, and GPP is gross primary production.
-
-We define soil carbon turnover as the ratio between the total carbon stocks and the outflux. For terrestrial soils, the total carbon stock is the total soil carbon stores and the outflux is heterotrophic respiration. Therefore, soil carbon turnover time can be considered using the following equation $\tau_\mathrm{s}$ = cSoil/$R_\mathrm{h}$. Where, $\tau_\mathrm{s}$ is soil carbon turnover, cSoil is soil carbon, and $R_\mathrm{h}$ is heterotrophic respiration.
-
-The analysis was completed using model output from the historical simulation of the UKESM1-0-LL r1i1p1f2 variant. A reference time period was considered, 2001-2010, to best match the observational data time frame considered, then monthly model output data was time averaged over this period. The following output variables were considered in this analysis: ‘soil carbon content’ (cSoil) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘vegetation carbon content’ (cVeg) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘gross primary production’ (GPP) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$,  ‘heterotrophic respiration carbon flux’ (Rh) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, ‘precipitation flux’ (Pr) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, and ‘air temperature’ (tas) in K.
-The variables cSoil, cVeg, and GPP were used to obtain values for ecosystem carbon turnover time ($\tau_\mathrm{e}$) in years, using the equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/(GPP ∗ 86400 ∗ 365). The variables cSoil and $R_\mathrm{h}$ were used to obtain values for soil carbon turnover time ($\tau_\mathrm{s}$) in years, using the equation $\tau_\mathrm{s}$ = cSoil/($R_\mathrm{h}$ ∗ 86400 ∗ 365). The model precipitation units were converted from $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$ to $\mathrm{kg} \mathrm{m}^{−2} \mathrm{yr}^{−1}$ for consistency. The model temperature variable units were converted from K to $^\circ$C. 
+where $A_i$ is the grid cell areas, $sim_{i,j}$ is simulated and $obs_{i,j}$ observed fractional cover of cover type, $j$ in cell $i$. $\Sigma_j sim_{i,j}$ and $\Sigma_j obs_{i,j}$.
 
 \subsection{Annual average comparisons}
-The sum the squared (for $NMSE$) or absolute (for $NME$) distance between observations ($obs$) and reconstructed burnt area from an ensemble member (sim()) over all cells  ( ) weighted by cell area ( ) and normalised by mean variation in obs
+We made annual average comparisons using $NME$ and $NMSE$ metrics. Here, the sum the squared (for $NMSE$) or absolute (for $NME$) distance between observations ($obs_i$) and reconstructed burnt area from an ensemble member ($sim_i$) are normalised by mean variation in obs:
 
 \begin{equation}
-    NME = \frac{\Sigma_i A_i \times  |sim - obs_i |}{\Sigma_i A_i \times |\bar{obs} - obs_i |} \  \text{   and   } \
-    NMSE = \frac{\Sigma_i A_i \times  (sim- obs_i) }{\Sigma_i A_i \times (\bar{obs} - obs_i )}
+    NME = \frac{\Sigma_i A_i \times  |sim_i - obs_i |}{\Sigma_i A_i \times |\bar{obs} - obs_i |} \  \text{   and   } \
+    NMSE = \frac{\Sigma_i A_i \times  (sim_i- obs_i) }{\Sigma_i A_i \times (\bar{obs} - obs_i )}
 \end{equation}
 
 \subsection{Seasonal}
-Seasonality comparisons are conducted in three parts as  (Kelley et al., submitted, 2013a): 1)modality - i.e how many “seasons” there are in a given year; 2), phase, or timing, of the season; and 3) seasonal concentration (inverse season length).
+Seasonality comparisons are conducted in three parts as  \citet{kelley2013comprehensive, kelley2021low}:
 
-To determine the modality of a given cell, we first calculated the monthly climatology. The month of the minimum burnt area from this climatology is defined as the start of the “fire year”. We then find the position of each maxima turning point throughout the year:	
+\begin{itemize}
+    \item \textit{modality} - i.e how many “seasons” there are in a given year. To determine the modality of a given cell, we first calculated the monthly climatology. The month of the minimum burnt area from this climatology is defined as the start of the “fire year”. We then find the position of each maxima turning point throughout the year:	
 \begin{equation}
     P = \left\{p_i | \frac{dv(p_i)}{dt} = 0 \wedge \frac{d^2v(p_i)}{dt^2} < 0 \wedge v(p_i) < v(p_{i+1}) \right\}
 \end{equation}
@@ -330,70 +348,64 @@ The modality (MOD) is the prominence of each of these turning points (i.e the mi
 
 If there are no turning points, then modality is set to 0. If there is one turning point, MOD is 1. The higher the number beyond that, the higher the modality. Observational and simulated MOD  was then compared using NME/NMSE.
 
-For phase and concentration, each month, m, can be represented by a vector in the complex plane whose direction (m) corresponds to the time of year and length to the magnitude of the variable for that month:
+    \item \textit{Phase} is the timing of the season, assuming one season in the year. For phase each month, $m$, can be represented by a vector in the complex plane whose direction corresponds to the time of year and length to the magnitude of the variable for that month:
 \begin{equation}
     \theta_m = 2 \times \pi \times (m-1) / 12
 \end{equation}
 
-A mean vector L can be calculated by averaging the real ($L_x$) and imaginary ($L_y$) parts of the 12 vectors ($x_m$).
+A mean vector, $L$, can be calculated by averaging the real ($L_x$) and imaginary ($L_y$) parts of the 12 vectors ($x_m$).
 
 \begin{equation}
     L_x = \Sigma_m x_m \times cos(\theta_m) \ \text{   and   } \
     L_y = \Sigma_m x_m \times sin(\theta_m)
 \end{equation}
 
-Seasonal concentration (C) is the mean vector length by the annual average of the given variable, whilst seasonal phase (P) is the direction of the vector:
-
+The phase ($P$) of this vector is its direction:
 \begin{equation}
-    C = \frac{\sqrt{L_x^2 + L_y^2}}{\Sigma_m x_m}
+    P  = arctan{L_x/L_y}
 \end{equation}
 
-\begin{equation}
-    P arctan{L_x/L_y}
-\end{equation}
-
-C is equal to 1 when a give variable is concentrated into one month, whilse P corresponds to that month. concentration is zero and phase is undefined if the variable  is evenly spread throughout the year, and the is not included in subsequent phase comparisons. Cis compared using NME/NMSE step 1. Phase is compared using mean phase difference (MPD), which represents the average timing erro, as a proportion of the maximum phase mismatch of 6 months.
+phase is undefined if the variable  is evenly spread throughout the year which, in reality, only occurs the $\Sigma_m x = 0$. If this is the case for phase from either simulation ($P_{sim, i}$) and observation ($P_{obs, i}$), then they are removed from analysis. Otherwise, $P_{sim, i}$ and $P_{obs, i}$ are compared using mean phase difference ($MPD$), which represents the average timing error, as a proportion of the maximum phase mismatch of 6 months.
 
 \begin{equation}
     MPD = \pi^{-1} \times \Sigma_m A_i \times arccos \big[ cos \big(P_{sim, i} - P_{obs, i} \big) \big] / \Sigma_i A_i 
 \end{equation}
 
+    \item Seasonal concentration is how concentrated the season is around this peak phase, again assuming a single season - i.e the inverse of season length. The concentration of $L$ ($C$) is the mean vector length by the annual average of the given variable:
+
+\begin{equation}
+    C = \frac{\sqrt{L_x^2 + L_y^2}}{\Sigma_m x_m}
+\end{equation}
+
+$C$ is equal to 1 when a give variable is concentrated into one month (and $P$ corresponds to that month), and approaches 0 as the variables becomes evenly spread throughout the year. Again, if $\Sigma_m x = 0$ for either simulation or observation, then the grid cell is removed from comparison. Simulated and observed concentration ($C_{sim, i}$ and $C_{obs, i}$ respectively) are then compared using NME/NMSE step 1.
+
+\end{itemize}
+
 \subsection{Metric interpretation}
-Smaller NME, NMSE and MPD scores indicate a better agreement between simulation and observation, with a perfect score (i.e., simulation that perfectly matches observations) of 0. We also used three null models to help interpret the score as per (Burton et al., 2019; Kelley et al., 2019). The mean null model compares the mean of all observations with the observations. For NME and NMSE, the mean null model is always 1 as these metrics are normalised by the mean difference.. The best “single value” model for NME and MM compares the median of observations to observations. By definition, it’s score is less than or equal to the mean model score. The mean and median null model scores for MPD depends on the observations. The “randomly resampled” null model compares randomly-resampled observations (without replacement) to the observations. The score depends on resampling order, so we used 1000 bootstraps to determine the null models distribution. 
+Smaller NME, NMSE and MPD scores indicate a better agreement between simulation and observation, with a perfect score (i.e., simulation that perfectly matches observations) of 0. We also used three null models to help interpret the score as per \citet{Burton2019-by, Kelley2019-yu}. The mean null model compares the mean of all observations with the observations. For NME and NMSE, the mean null model is always 1 as these metrics are normalised by the mean difference.. The best “single value” model for NME and MM compares the median of observations to observations. By definition, it’s score is less than or equal to the mean model score. The mean and median null model scores for MPD depends on the observations. The “randomly resampled” null model compares randomly-resampled observations (without replacement) to the observations. The score depends on resampling order, so we used 1000 bootstraps to determine the null models distribution. 
 
 
-\subsection{Benchmark datasets}
+\subsection{Turnover times}
+We follow the common definition of ecosystem carbon turnover time as the ratio between the total carbon stocks and the outflux. For a terrestrial ecosystem, the total carbon stock is comprised of vegetation carbon and soil carbon, and the outflux is the carbon loss from the ecosystem, such as autotrophic respiration from plants and heterotrophic respiration from the soil. We can make a steady state assumption, which implies that the outflux of carbon into the ecosystem is equal to the influx.  Therefore, ecosystem carbon turnover time can be considered using the following equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/GPP. Where, $\tau_\mathrm{e}$ is ecosystem carbon turnover time, cSoil is soil carbon, cVeg is vegetation carbon, and GPP is gross primary production.
 
-\subsubsection{Climate}
-Here we estimate the functional response of GPP to precipitation and surface downward shortwave radiation (SWR). For the global analysis, we use total grid points binned in terms of the independent variable (x) using 25 bins. In each bin, we compute the mean value of the corresponding dependent variable (y) to approximate the functional dependence of y on x. Data points show the mean and the error bars reﬂect the standard deviation range. We then assess the relationships by region using a simple scatter plot, first for South America tropical forest, and then South East Asia. Model data in all cases is the mean of the 9 ensemble members evaluated against observations from GBAF (GPP), CERES (SWR), and GPCP2 (precipitation) for 1982-2008 mean (see plots in section entitled “Climate Relationships”).
+We define soil carbon turnover as the ratio between the total carbon stocks and the outflux. For terrestrial soils, the total carbon stock is the total soil carbon stores and the outflux is heterotrophic respiration. Therefore, soil carbon turnover time can be considered using the following equation $\tau_\mathrm{s}$ = cSoil/$R_\mathrm{h}$. Where, $\tau_\mathrm{s}$ is soil carbon turnover, cSoil is soil carbon, and $R_\mathrm{h}$ is heterotrophic respiration.
 
-\subsubsection{Vegetation cover}
-Three satellite land cover data sets were used for vegetation distribution comparisons. The European Space Agency (ESA) Climate Change Initiative Land Cover data (CCI)\cite{hartley2017uncertainty} and that from the International Geosphere-Biosphere Programme Land Use and Cover Change project (IGBP) \citep{Loveland2000-sx} and MODIS Vegetation Continuous Fields (VCF) \citep{Dimiceli_undated-el}.
-
-\hilight{Andy - How was IBGP processed}
-Three satellite land cover data sets were used for vegetation distribution comparisons. The European Space Agency (ESA) Climate Change Initiative Land Cover data (CCI); \cite{hartley2017uncertainty,Poulter2015-lo} and that from the International Geosphere-Biosphere Programme Land Use and Cover Change project (IGBP) (Loveland et al., 2000) and MODIS Vegetation Continuous Fields (VCF) (Dimiceli and Others, n.d.).
-
-\subsubsection{LAI}
-
-
-\subsubsection{Carbon (inc. Turnover)}
-Observational soil carbon was estimated to a depth of 1m by combining the Harmonized World Soils Database (HWSD) [1] and Northern Circumpolar Soil Carbon Database (NCSCD) [2] soil carbon datasets, where NCSCD was used where overlap occurs. For vegetation carbon, we used an observational land biomass dataset [3]. Observational GPP was derived from Fluxnet-MTE originally from monthly estimates of global biosphere-atmosphere fluxes from biogeochemistry group at Max Planck Institute [4]. The CARDAMOM (2001-2010) dataset is used for observational heterotrophic respiration [5]. The WFDEI dataset is used for our observational air temperatures (2001-2010) [6]. The GPCC dataset is used for our observational precipitation data [7].
-
-\subsubsection{Wetland}
-We process the UKESM Historical ensemble members from 2000 - 2014 and calculate the ensemble mean, regridded to 0.5 x 0.5 degrees.
-
-The Wetland Area and Dynamics for Methane Modeling (WAD2M), an updated version of SWAMPS-GLWD (Poulter et al., 2017), is a 0.5 x 0.5 degree global wetland dynamic dataset that integrates the static Global Lakes and Wetlands Dataset (Lehner and Döll, 2004) with observations of the inundation seasonal cycle from the Surface WAter Microwave Product Series (Schroeder et al., 2015). WAD2M covers 2000 - 2018, overlapping with the UKESM historical up to 2014.
-
-We compare the UKESM wetland fraction (fracWet) to the wetland fraction obtained from WAD2M. We calculate the zonal mean of both data sets between 2000 - 2014, as well as calculating the variability (standard deviation) in the temporal domain.
-
-\subsubsection{River flow}
-Modelled, long-term, annual river flow is compared against observations \citep{Dai2009}. For the direct comparison we use the \citep{Dai2009} dataset from 925 stations which only uses observations and does not infill using land surface model output. Only 1990-2005 mean annual river flow is assessed, because at the sub-annual time-scale some river flow measurements will be impacted by the presence of dams upstream, and dams are not yet parameterised in UKESM1. We only make comparisons with the observations where the time series overlap, which results in a comparison against 134 stations. 
+The analysis was completed using model output from the historical simulation of the UKESM1-0-LL r1i1p1f2 variant. A reference time period was considered, 2001-2010, to best match the observational data time frame considered, then monthly model output data was time averaged over this period. The following output variables were considered in this analysis: ‘soil carbon content’ (cSoil) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘vegetation carbon content’ (cVeg) in $\mathrm{kg} \mathrm{m}^{−2}$, ‘gross primary production’ (GPP) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$,  ‘heterotrophic respiration carbon flux’ (Rh) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, ‘precipitation flux’ (Pr) in $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$, and ‘air temperature’ (tas) in K.
+The variables cSoil, cVeg, and GPP were used to obtain values for ecosystem carbon turnover time ($\tau_\mathrm{e}$) in years, using the equation $\tau_\mathrm{e}$ = (cSoil + cVeg)/(GPP ∗ 86400 ∗ 365). The variables cSoil and $R_\mathrm{h}$ were used to obtain values for soil carbon turnover time ($\tau_\mathrm{s}$) in years, using the equation $\tau_\mathrm{s}$ = cSoil/($R_\mathrm{h}$ ∗ 86400 ∗ 365). The model precipitation units were converted from $\mathrm{kg} \mathrm{m}^{−2} \mathrm{s}^{−1}$ to $\mathrm{kg} \mathrm{m}^{−2} \mathrm{yr}^{−1}$ for consistency. The model temperature variable units were converted from K to $^\circ$C. 
 
 \section{Results}
-
 Overview of scores with ref to Fig. \ref{fig:scores}
 
 \subsection{Climate}
+\hilight{Alistiar - checj how much of this is covered in your evaluation paper}
+\begin{itemize}
+    \item Broad scale patterns are cool
+    \item Sahel, Eastern Amazon and India are too dry and hot.
+    \item Dryness in India is due to missing wet season precipitation (Fig. xx \ref{fig:ClimateSeasonUKESMmaps}), in areas of very high concentration in precipitation ($C_{mod} \rightarrow 1$, Fig. \ref{fig:ClimateSeasonObsMaps}) 
+    \item There is too much annual precipitation in much of the Southern Hemisphere, particularly south of the Amazon, in the Ceraado and Catinga Savanna and woodland and southern Africa.
+    \item UKESM captures the precip, tempuarture \label{fig:ClimateAAMaps} and precip biomadiaity \ref{fig:ClimateSeasonUKESMmaps} of the Eurasian Steppe
+    \item biases in MAT and MAT seem to be correclated - where its to wet its too hot and vice versa. Australia is the exception, where there is a ~ 2 degree warm bias corrisiciding with a 10-200 mm/yr wet biases in an areas that typically reciences very liuttle precipitation \label{fig:ClimateAAMaps}. Precicpitation modality, timing and conceptration are reproduced by UKESM, though their is a stronger seasonal cycle in tempertaure \ref{fig:ClimateSeasonUKESMmaps}, with too hot summers (Fig. xx)
+\end{itemize}
 
 \begin{itemize}
     \item{Wet bias: Vs CMAP bias = 0.321 mm/day. Vs Fluxnet bias = 0.000661 mm/day. Vs GPCC = 0.189. Vs GPCP2 = 0.0332
@@ -406,35 +418,32 @@ Largest bias is vs CMAP. Wet bias over Andes, southern Brazil, China. Dry bias o
     \caption{Climate comparison \label{fig:ClimateAAMaps}}
 \end{figure*}
 
-%\subsection{Soil moisture}
-%\hilight{Ranjini?} 
-%this is in here for HadGEM3 - %https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2018MS001370
-
-\subsubsection{Cold processes including albedo}
-\hilight{Eleanor - we need to decide what is different between JULEs-ES and GL7 - I suspect we actually need only an albedo plot}
-\hilight{Eleanor - bit of text & can I get original figures (they didnt copy into google docs vert well)}
-\hilight{Rob P - want to make a plot?}
-
-\subsubsection{LST}
-\hilight{Rob K}
-
-\subsubsection{Drought}
-\hilight{Phil - bit of a summary of results}
 \begin{figure*}[t]
-    \includegraphics[width=6cm]{figs/drought.png}
-    \caption{Caption Phil? \label{fig:drought} }
+    \includegraphics[width=12cm]{figs/Climate/climStuff-UKESM.png}
+    \caption{UKESM precipitation (a, c, e) and temperature (b, d, f) seasonal metrics. a,b) modality; c,d) concentration; e,f) phase. g) shows the difference in phase between precip and temperature. Positive shows precip leading temperature, negative precip lagging temperature. Dots show smaller spread (higher confidence) across ensemble members. <<define>>  \label{fig:ClimateSeasonUKESMmaps}}
 \end{figure*}
 
-
+\begin{figure*}[t]
+    \includegraphics[width=12cm]{figs/Climate/climStuff-Observations.png}
+    \caption{Observed precipitation (a, c, e) and temperature (b, d, f) seasonal metrics. a,b) modality; c,d) concentration; e,f) phase. g) shows the difference in phase between precip and temperature. Positive shows precip leading temperature, negative precip lagging temperature. Dots show smaller spread (higher confidence) across ensemble members. <<defibe>> \label{fig:ClimateSeasonObsMaps}}
+\end{figure*}
 
 \subsection{Vegetation Distribution}
+UKESM reproduces the board scale vegetation distributions (Fig. \ref{fig:VegDistMap}), including high tree cover in main tropical forests and high-latitude boreal regions, some grass transition in tropical savannas and temperate grasslands, and unvegetated in major deserts and arid regions. This is reflected in a $MM$ score of xx globally. However, there are a number of biases in simulated vegetation. There is too little tree cover in the north Congo rainforest, with too rapid a transition in a southern shifted Sahel and a more extensive Sahara than seen in observations - consistent with dry, hot bias climate bias \label{fig:ClimateAAMaps}. Similarly, there is too little grass cover in areas of dry bias around the Indian monsoon. Tree cover seems to be robust against the dry bias in the Eastern Amazon. Conversely, tree cover is too extensive in South Africa, North Africa, Boreal America, SE Asia, mathcing UKESMs wet bias  \label{fig:ClimateAAMaps}. 
+
+In many places, there the transition between arid and forested areas is too rapid \ref{fig:VegDistTri}. A lack on mix of tree and herb cover in much of the world, particularly Australia, Africa, Temperate America. The same could be true for Boreal regions, though there is disagreement in the observations here.. This can occur in the asbsence of any obsvious climate biases, such as in the Eurasian Steppe \ref{fig:VegDistTri}, which is simply partitioned between bareground and forest in the model \ref{fig:VegDistMap}. Australia and SE Asia also show to tight a transition from non-vegetated to vegetated (R2 in Fig. \ref{fig:VegDistTri})
+
+ Too much bare soil in SE Asia, North Africa, possibly in Australia though depending on observations. 
+
+
+tested with reponses in climate space
+
 \begin{itemize}
-    \item A lack on mix of tree and herb cover in much of the world, particularly Australia, Africa, Temperate America. The same could be true for Boreal regions, though there is disagreement in the observations here.
-    \item Australia and SE Asia also show to tight a transition from non-vegetated to vegetated (R2 in Fig. \ref{fig:VegDistTri})
+    \item 
     \item causes too much tree cover extent and, in some places, to much bare ground with very rapid transitions (Figure  \ref{fig:VegDistMap}).
     \item grass extent is generally to small, but where grass does occur, there is too much of it.
-    \item Too much bare soil in SE Asia, North Africa, possibly in Australia though depending on observations
-    \item Too extensive in South Africa, North Africa, Boreal America, SE Asia, 
+    \item 
+    \item 
 \end{itemize}
 
 
@@ -448,12 +457,14 @@ Largest bias is vs CMAP. Wet bias over Andes, southern Brazil, China. Dry bias o
 \caption{Tree (right axis), grass (left axis) and bare cover (bottom axis) variations over possible vegetated land (i.e excluding urban and water). Top row show global distributions and subsequent rows for each realm (Fig. \ref{fig:regionsMap}). First column as simulated by UKESM enemble mean, and subsequent columns for VCF, CCI, IGBP obervations <<add refs>> \label{fig:VegDistTri}}
 \end{figure}
 
-
-\hilight{Rebecca - I would if we could also do a veg fraction "turnover"?}
-
 \subsection{Phenology}
 
 \hilight{Doug - update with new LAI product}
+
+\begin{itemize}
+    \item LAI seems fine in eastern Amazon
+    \item LAI is to big in Cerrado, Catinga, Miombo woodlands. Though LAI is impved  when correcting for vegtation distribution errors, though biases rmeain
+\end{itemize}
 
 \begin{figure*}[t]
     %\begin{subfigure}
@@ -482,7 +493,6 @@ Largest bias is vs CMAP. Wet bias over Andes, southern Brazil, China. Dry bias o
     \caption{Seasonal comparison for LAI \label{fig:LAIseasonalMap}}
 \end{figure*}
 
-
 \subsection{Carbon}
 \hilight{Eddy - include fluxnet?}
 
@@ -493,11 +503,47 @@ Largest bias is vs CMAP. Wet bias over Andes, southern Brazil, China. Dry bias o
 \end{itemize}
 
 \subsubsection{Vegetation carbon}
+
+\begin{itemize}
+    \item lack of grass and tree cover in Sahael and India lead to less production than seen in obervations (Fig.). 
+    \item Despite maintaining high tree cover, the dry bias in the Eastern Amazon also caused a lack of prioduction and veg carbon
+    \item lack of productivity in Eurasian Steppe.
+\end{itemize}
 \hilight{Eddy/Chantelle. Anything in iLamb?}
 \hilight{Doug - use fireMIP stuff}
 
 \subsubsection{Soil carbon}
 \hilight{Eddy/Chantelle. Anything in iLamb?}
+
+\subsection{Soil moisture}
+%\hilight{Ranjini?} 
+%this is in here for HadGEM3 - %https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2018MS001370
+\hilight{Doug: Soil moisture in climate space}
+
+\subsubsection{Cold processes including albedo}
+\hilight{Eleanor - we need to decide what is different between JULEs-ES and GL7 - I suspect we actually need only an albedo plot}
+%\hilight{Eleanor - bit of text & can I get original figures (they didnt copy into google docs vert well)}
+\hilight{Rob P - want to make a plot?}
+
+\subsubsection{LST}
+\hilight{Rob K}
+
+\subsubsection{Drought}
+\hilight{Phil - bit of a summary of results}
+\begin{figure*}[t]
+    \includegraphics[width=6cm]{figs/drought.png}
+    \caption{Caption Phil? \label{fig:drought} }
+\end{figure*}
+
+
+
+
+\hilight{Rebecca - I would if we could also do a veg fraction "turnover"?}
+
+
+
+
+
 
 \subsubsection{GPP}
 \begin{itemize}
@@ -583,15 +629,7 @@ Largest bias is vs CMAP. Wet bias over Andes, southern Brazil, China. Dry bias o
 
 
 
-\begin{figure*}[t]
-    \includegraphics[width=12cm]{figs/Climate/climStuff-UKESM.png}
-    \caption{UKESM precipitation (a, c, e) and temperature (b, d, f) seasonal metrics. a,b) modality; c,d) concentration; e,f) phase. g) shows the difference in phase between precip and temperature. Positive shows precip leading temperature, negative precip lagging temperature. Dots show smaller spread (higher confidence) across ensemble members. <<define>>  \label{fig:ClimateSeasonUKESMmaps}}
-\end{figure*}
 
-\begin{figure*}[t]
-    \includegraphics[width=12cm]{figs/Climate/climStuff-Observations.png}
-    \caption{Observed precipitation (a, c, e) and temperature (b, d, f) seasonal metrics. a,b) modality; c,d) concentration; e,f) phase. g) shows the difference in phase between precip and temperature. Positive shows precip leading temperature, negative precip lagging temperature. Dots show smaller spread (higher confidence) across ensemble members. <<defibe>> \label{fig:ClimateSeasonObsMaps}}
-\end{figure*}
 
 \subsection{Drivers}
 \hilight{Chantelle - Which figures to inlcude?}
@@ -624,6 +662,15 @@ Wetland methane emissions are primarily controlled by water table depth, tempera
 
 \subsubsection{River flow}
 There is a strong correlation with the multi-annual river flow (figure ***) \hilight{add figure} and obtain a correlation coefficient between modelled and observed for the multi-annual mean and log of river flow are 0.96 and 0.84 respectively. If we compare this to a similar off-line run where JULES is forced with observations we obtain correlation coefficients of 0.97 and 0.85 respectively, indicating that on a multi-year time scale UKESM is reproducing river flow well overall across the globe.
+
+\section{Discussion}
+
+\begin{itemize}
+    \item Mitsmatches in location of major biomes caused by climate biases
+    \item tranistion due to JULES issues.
+\end{itemize}
+
+
 
 \section{Pathway for future development}
 
@@ -668,6 +715,10 @@ TEXT
 
 
 \appendix
+
+\section{Stuff removed}
+%\subsubsection{Carbon and nitrogen cycle}
+%The carbon cycling within JULES is a well established model that was used in both HadGEM2-ES \citep{collins2011development} and the Global Carbon Budget annual assessment up to 2018 \citep{le2018global}. For UKESM1 a significant upgrade to the terrestrial carbon cycle was made \citep{Sellar2019-bo} to include an interactive nitrogen cycle \citep{wiltshire2020jules}, extended PFTs \cite{harper2016improved} and land-use change. This configuration has been in use as part of the Global Carbon Budget assessment since 2019 \citep{essd-11-1783-2019}. In TRIFFID, the nitrogen cycle closely follows the structure of the carbon cycle. Inputs to TRIFFID are via biological fixation and nitrogen deposition, while losses occur via leaching and gas loss. JULES simulates a nitrogen-limited ecosystem by reducing the net primary productivity if there is insufficient inorganic nitrogen in the soil to maintain the C:N ratio of the vegetation with any excess carbon assumed to be lost from the system.\\
 \section{}    %% Appendix A
 
 \subsection{}     %% Appendix A1, A2, etc.
@@ -952,3 +1003,4 @@ River discharge                    & (Dai et al., 2009) & Gauge station         
 
 
 \end{document}
+\citet
